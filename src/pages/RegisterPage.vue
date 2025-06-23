@@ -40,11 +40,14 @@
           @blur="v$.password.$touch()"
         />
         <b-form-invalid-feedback v-if="v$.password.$error">
-          <div v-if="!v$.password.required">Password is required.</div>
-          <div v-else-if="!v$.password.minLength || !v$.password.maxLength">
-            Password must be 5–10 characters.
-          </div>
-        </b-form-invalid-feedback>
+        <div v-if="!v$.password.required">Password is required.</div>
+        <div v-else-if="!v$.password.minLength || !v$.password.maxLength">
+          Password must be 5–10 characters.
+        </div>
+        <div v-else-if="!v$.password.hasNumber">Password must contain at least one number.</div>
+        <div v-else-if="!v$.password.hasSpecialChar">Password must contain at least one special character.</div>
+</b-form-invalid-feedback>
+
       </b-form-group>
 
       <!-- Confirm Password -->
@@ -86,8 +89,12 @@
 <script>
 import { reactive } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, maxLength, alpha, sameAs } from '@vuelidate/validators';
+import { required, minLength, maxLength, alpha, sameAs, helpers } from '@vuelidate/validators';
 import rawCountries from '../assets/countries';
+
+const hasNumber = helpers.regex('hasNumber', /[0-9]/);
+const hasSpecialChar = helpers.regex('hasSpecialChar', /[^A-Za-z0-9]/);
+
 
 export default {
   name: 'RegisterPage',
@@ -112,7 +119,10 @@ export default {
         required,
         minLength: minLength(5),
         maxLength: maxLength(10),
+        hasNumber,
+        hasSpecialChar
       },
+
       confirmedPassword: {
         required,
         sameAsPassword: sameAs(() => state.password),
@@ -126,6 +136,14 @@ export default {
       if (!valid) return;
 
       try {
+        const usernameExists = await window.axios.get('/users/check-username', {
+        params: { username: state.username }
+      });
+      if (usernameExists.data.exists) {
+        state.submitError = 'Username already exists. Please choose another one.';
+        return;
+      }
+
         await window.axios.post('/register', {
           username: state.username,
           password: state.password,
