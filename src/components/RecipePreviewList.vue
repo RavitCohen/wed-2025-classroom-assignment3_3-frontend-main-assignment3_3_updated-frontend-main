@@ -36,7 +36,7 @@ export default {
     async updateRecipes() {
       try {
         const response = await this.axios.get(
-          this.$root.store.server_domain + "/recipes/random"
+          this.$root.store.server_domain + "/recipes"
         );
         const recipes = response.data.recipes;
         this.recipes = [];

@@ -18,6 +18,19 @@
         </b-form-invalid-feedback>
       </b-form-group>
 
+      <b-form-group label="First Name" label-for="firstname">
+        <b-form-input id="firstname" v-model="state.firstname" />
+      </b-form-group>
+
+      <b-form-group label="Last Name" label-for="lastname">
+        <b-form-input id="lastname" v-model="state.lastname" />
+      </b-form-group>
+
+      <b-form-group label="Email" label-for="email">
+        <b-form-input id="email" type="email" v-model="state.email" />
+      </b-form-group>
+
+
       <!-- Country -->
       <b-form-group label="Country" label-for="country">
         <b-form-select
@@ -101,9 +114,12 @@ export default {
   setup() {
     const state = reactive({
       username: '',
+      firstname: '',
+      lastname: '',
+      email: '',
+      country: '',
       password: '',
       confirmedPassword: '',
-      country: '',
       submitError: null,
     });
 
@@ -136,7 +152,8 @@ export default {
       if (!valid) return;
 
       try {
-        const usernameExists = await window.axios.get('/users/check-username', {
+        console.log('Registering user...', state);
+        const usernameExists = await window.axios.get('/user/check-username', {
         params: { username: state.username }
       });
       if (usernameExists.data.exists) {
@@ -144,14 +161,18 @@ export default {
         return;
       }
 
-        await window.axios.post('/register', {
+        await window.axios.post('/Register', {
           username: state.username,
-          password: state.password,
+          firstname: state.firstname,
+          lastname: state.lastname,
+          email: state.email,
           country: state.country,
+          password: state.password,
         });
         window.toast('Registration successful', 'You can now login', 'success');
-        window.router.push('/login');
+        window.router.push('/Login');
       } catch (err) {
+        console.error('Registration error:', err);
         state.submitError = err.response?.data?.message || 'Unexpected error.';
       }
     };

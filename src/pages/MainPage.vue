@@ -69,7 +69,7 @@ export default {
 
     const loadMoreRandom = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/recipes/random');
+        const res = await axios.get('http://localhost:3000/recipes');
         randomRecipes.value = res.data;
       } catch (err) {
         console.error('שגיאה בטעינת מתכונים רנדומליים:', err);
