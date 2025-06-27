@@ -34,7 +34,7 @@ const routes = [
   }, 
   {
   path: "/favorites",
-  name: "myFavorite",
+  name: "favorites",
   component: () => import("../pages/MyFavoritePage.vue"),
 },
 {
@@ -44,7 +44,7 @@ const routes = [
 },
 {
   path: "/family-recipes",
-  name: "myFamilyRecipes",
+  name: "familyRecipes",
   component: () => import("../pages/MyFamilyRecipesPage.vue"),
 },
 

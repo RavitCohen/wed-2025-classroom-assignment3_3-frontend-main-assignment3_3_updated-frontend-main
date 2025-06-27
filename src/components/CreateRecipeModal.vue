@@ -10,24 +10,37 @@
         <b-form-input v-model="form.title" required />
       </b-form-group>
 
-      <b-form-group label="תיאור">
-        <b-form-textarea v-model="form.description" rows="3" />
+      <b-form-group label="זמן הכנה (בדקות)">
+        <b-form-input v-model.number="form.readyInMinutes" type="number" min="1" required />
       </b-form-group>
 
       <b-form-group label="תמונה (קישור URL)">
         <b-form-input v-model="form.image" type="url" />
       </b-form-group>
 
-      <b-form-group label="רשימת מרכיבים">
+      <b-form-group label="האם טבעוני?">
+        <b-form-checkbox v-model="form.vegan">כן</b-form-checkbox>
+      </b-form-group>
+
+      <b-form-group label="האם צמחוני?">
+        <b-form-checkbox v-model="form.vegetarian">כן</b-form-checkbox>
+      </b-form-group>
+
+      <b-form-group label="ללא גלוטן?">
+        <b-form-checkbox v-model="form.glutenFree">כן</b-form-checkbox>
+      </b-form-group>
+
+      <b-form-group label="רשימת מרכיבים (extendedIngredients)">
         <b-form-textarea
-          v-model="form.ingredients"
-          placeholder="הפרד בין רכיבים עם פסיקים (,)"
+          v-model="form.extendedIngredients"
+          placeholder="הפרד בין רכיבים עם פסיקים (,) לדוגמה: קמח, ביצים, סוכר"
           rows="3"
+          required
         />
       </b-form-group>
 
       <b-form-group label="הוראות הכנה">
-        <b-form-textarea v-model="form.instructions" rows="4" />
+        <b-form-textarea v-model="form.instructions" rows="4" required />
       </b-form-group>
 
       <b-form-group label="מספר מנות">
@@ -53,7 +66,6 @@
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import store from "@/store";
 
 export default {
   name: "CreateRecipeModal",
@@ -65,12 +77,15 @@ export default {
     const router = useRouter();
 
     const form = ref({
-      title: "",
-      description: "",
-      image: "",
-      ingredients: "",
-      instructions: "",
-      servings: 1,
+    title: "",
+    readyInMinutes: 1,
+    image: "",
+    vegan: "",
+    vegetarian: "",
+    glutenFree: "",
+    extendedIngredients: "",
+    instructions: "",
+    servings: 1,
     });
 
     const onUpdateShow = (val) => {
@@ -79,24 +94,26 @@ export default {
 
     const submitRecipe = async () => {
       try {
+        console.log(`User input: ${payload}`);
         const payload = {
           ...form.value,
-          ingredients: form.value.ingredients
+          extendedIngredients: form.value.extendedIngredients
             .split(",")
             .map((i) => i.trim()),
         };
-        await axios.post("http://localhost:3000/recipes/create", payload, {
-          headers: { Authorization: `Bearer ${store.token}` },
+        await axios.post("http://localhost:3000/user/recipes/", payload, {
+          withCredentials: true,
         });
-
+        console.log("Create recipes invoked successfully on Node.js");
         emit("update:show", false);
-        window.toast("המתכון נשמר בהצלחה", "", "success");
+        alert("המתכון נשמר בהצלחה", "", "success");
 
         // ניווט לעמוד המתכונים של המשתמש
         router.push({ name: "myRecipes" });
       } catch (err) {
         console.error("שגיאה ביצירת מתכון:", err);
-        window.toast("שגיאה בשמירה", "", "danger");
+        console.error("שגיאה ביצירת מתכון:", err?.response?.data || err.message || err);
+
       }
     };
 
@@ -106,9 +123,12 @@ export default {
         if (!newVal) {
           form.value = {
             title: "",
-            description: "",
+            readyInMinutes: 1,
             image: "",
-            ingredients: "",
+            vegan: "",
+            vegetarian: "",
+            glutenFree: "",
+            extendedIngredients: "",
             instructions: "",
             servings: 1,
           };

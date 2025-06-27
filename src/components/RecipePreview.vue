@@ -10,13 +10,13 @@
       <div class="card-body text-center">
         <h5 class="card-title">{{ recipe.title }}</h5>
         <p class="card-text">{{ recipe.readyInMinutes }} דקות</p>
-        <p class="card-text">{{ recipe.aggregateLikes }} לייקים</p>
+        <p class="card-text">{{ recipe.popularity }} לייקים</p>
 
         <div class="badges my-2">
           <b-badge v-if="recipe.vegetarian" variant="success" class="mx-1">🌱 טבעוני</b-badge>
           <b-badge v-if="recipe.glutenFree" variant="warning" class="mx-1">🚫 גלוטן</b-badge>
-          <b-badge v-if="recipe.wasWatched" variant="info" class="mx-1">👁️ נצפה</b-badge>
-          <b-badge v-if="recipe.isFavorite" variant="danger" class="mx-1">❤️ מועדף</b-badge>
+          <b-badge v-if="recipe.isWatched" variant="info" class="mx-1">👁️ נצפה</b-badge>
+          <b-badge v-if="recipe.isFavoriteByUser" variant="danger" class="mx-1">❤️ מועדף</b-badge>
         </div>
       </div>
     </div>
@@ -50,3 +50,4 @@ export default {
   transition: transform 0.2s ease-in-out;
 }
 </style>
+

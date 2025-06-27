@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="container py-4">
     <h2 class="text-center mb-4">❤️ המועדפים שלי</h2>
     <RecipePreviewList v-if="favorites.length > 0" :recipes="favorites" title="מתכונים שמורים" />
@@ -37,5 +37,14 @@ export default {
 
     return { favorites };
   }
+};
+</script> -->
+<template>
+  <div></div>
+</template>
+
+<script>
+export default {
+  name: "ComponentName",
 };
 </script>

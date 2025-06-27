@@ -1,79 +1,72 @@
 <template>
   <div class="container mt-4" style="max-width: 500px;">
     <h2 class="mb-4">Register</h2>
-    <b-form @submit.prevent="register">
-      <!-- Username -->
+    <b-form @submit.prevent="handleRegister">
       <b-form-group label="Username" label-for="username">
         <b-form-input
           id="username"
           v-model="state.username"
-          @blur="v$.username.$touch()"
+          @blur="validations.username.$touch()"
         />
-        <b-form-invalid-feedback v-if="v$.username.$error">
-          <div v-if="!v$.username.required">Username is required.</div>
-          <div v-else-if="!v$.username.minLength || !v$.username.maxLength">
+        <b-form-invalid-feedback v-if="validations.username.$error">
+          <div v-if="!validations.username.required">Username is required.</div>
+          <div v-else-if="!validations.username.minLength || !validations.username.maxLength">
             Username must be 3–8 characters.
           </div>
-          <div v-else-if="!v$.username.alpha">Username must contain only letters.</div>
         </b-form-invalid-feedback>
       </b-form-group>
 
       <b-form-group label="First Name" label-for="firstname">
-        <b-form-input id="firstname" v-model="state.firstname" />
+        <b-form-input id="firstname" v-model="state.firstName" />
       </b-form-group>
 
       <b-form-group label="Last Name" label-for="lastname">
-        <b-form-input id="lastname" v-model="state.lastname" />
+        <b-form-input id="lastname" v-model="state.lastName" />
       </b-form-group>
 
       <b-form-group label="Email" label-for="email">
         <b-form-input id="email" type="email" v-model="state.email" />
       </b-form-group>
 
-
-      <!-- Country -->
       <b-form-group label="Country" label-for="country">
         <b-form-select
           id="country"
           v-model="state.country"
-          :options="countries"
-          @change="v$.country.$touch()"
+          :options="state.countries"
+          @change="validations.country.$touch()"
         />
-        <b-form-invalid-feedback v-if="v$.country.$error">
+        <b-form-invalid-feedback v-if="validations.country.$error">
           Country is required.
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <!-- Password -->
       <b-form-group label="Password" label-for="password">
         <b-form-input
           id="password"
           type="password"
           v-model="state.password"
-          @blur="v$.password.$touch()"
+          @blur="validations.password.$touch()"
         />
-        <b-form-invalid-feedback v-if="v$.password.$error">
-        <div v-if="!v$.password.required">Password is required.</div>
-        <div v-else-if="!v$.password.minLength || !v$.password.maxLength">
-          Password must be 5–10 characters.
-        </div>
-        <div v-else-if="!v$.password.hasNumber">Password must contain at least one number.</div>
-        <div v-else-if="!v$.password.hasSpecialChar">Password must contain at least one special character.</div>
-</b-form-invalid-feedback>
-
+        <b-form-invalid-feedback v-if="validations.password.$error">
+          <div v-if="!validations.password.required">Password is required.</div>
+          <div v-else-if="!validations.password.minLength || !validations.password.maxLength">
+            Password must be 5–10 characters.
+          </div>
+          <div v-else-if="!validations.password.hasNumber">Password must contain at least one number.</div>
+          <div v-else-if="!validations.password.hasSpecialChar">Password must contain at least one special character.</div>
+        </b-form-invalid-feedback>
       </b-form-group>
 
-      <!-- Confirm Password -->
       <b-form-group label="Confirm Password" label-for="confirmedPassword">
         <b-form-input
           id="confirmedPassword"
           type="password"
-          v-model="state.confirmedPassword"
-          @blur="v$.confirmedPassword.$touch()"
+          v-model="state.confirmPassword"
+          @blur="validations.confirmPassword.$touch()"
         />
-        <b-form-invalid-feedback v-if="v$.confirmedPassword.$error">
-          <div v-if="!v$.confirmedPassword.required">Confirmation is required.</div>
-          <div v-else-if="!v$.confirmedPassword.sameAsPassword">
+        <b-form-invalid-feedback v-if="validations.confirmPassword.$error">
+          <div v-if="!validations.confirmPassword.required">Confirmation is required.</div>
+          <div v-else-if="!validations.confirmPassword.sameAsPassword">
             Passwords do not match.
           </div>
         </b-form-invalid-feedback>
@@ -81,13 +74,7 @@
 
       <b-button type="submit" variant="success" class="w-100">Register</b-button>
 
-      <b-alert
-        variant="danger"
-        class="mt-3"
-        dismissible
-        v-if="state.submitError"
-        show
-      >
+      <b-alert variant="danger" class="mt-3" dismissible v-if="state.submitError" show>
         Registration failed: {{ state.submitError }}
       </b-alert>
 
@@ -100,89 +87,120 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
-import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, maxLength, alpha, sameAs, helpers } from '@vuelidate/validators';
-import rawCountries from '../assets/countries';
-
-const hasNumber = helpers.regex('hasNumber', /[0-9]/);
-const hasSpecialChar = helpers.regex('hasSpecialChar', /[^A-Za-z0-9]/);
-
+import { reactive, onMounted, nextTick, ref, computed, getCurrentInstance } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, minLength, maxLength, email, sameAs } from '@vuelidate/validators'
+import countries from '../assets/countries'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'RegisterPage',
   setup() {
+    const { proxy } = getCurrentInstance()
+    const showPassword = ref(false)
+    const showConfirmPassword = ref(false)
+    const serverError = ref('')
+    const router = useRouter()
+
     const state = reactive({
       username: '',
-      firstname: '',
-      lastname: '',
+      firstName: '',
+      lastName: '',
       email: '',
       country: '',
       password: '',
-      confirmedPassword: '',
-      submitError: null,
-    });
+      confirmPassword: '',
+      countries: [],
+      submitError: ''
+    })
+
+    const passwordValue = computed(() => state.password)
 
     const rules = {
-      username: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(8),
-        alpha,
-      },
+      username: { required, minLength: minLength(3), maxLength: maxLength(8) },
+      firstName: { required },
+      lastName: { required },
+      email: { required, email },
       country: { required },
       password: {
         required,
         minLength: minLength(5),
         maxLength: maxLength(10),
-        hasNumber,
-        hasSpecialChar
+        hasNumber: value => /\d/.test(value) || 'Password must include a number',
+        hasSpecialChar: value => /[!@#$%^&*(),.?":{}|<>]/.test(value) || 'Password must include a special character'
       },
-
-      confirmedPassword: {
+      confirmPassword: {
         required,
-        sameAsPassword: sameAs(() => state.password),
-      },
-    };
+        sameAsPassword: sameAs(passwordValue, 'Passwords do not match')
+      }
+    }
 
-    const v$ = useVuelidate(rules, state);
+    const v$ = useVuelidate(rules, state)
+    const validations = computed(() => v$.value)
 
-    const register = async () => {
-      const valid = await v$.value.$validate();
-      if (!valid) return;
+    onMounted(() => {
+      state.countries = countries.map(name => ({ value: name, text: name }));
+    });
 
-      try {
-        console.log('Registering user...', state);
-        const usernameExists = await window.axios.get('/user/check-username', {
-        params: { username: state.username }
-      });
-      if (usernameExists.data.exists) {
-        state.submitError = 'Username already exists. Please choose another one.';
+    const handleRegister = async () => {
+      console.log("Start handleRegister function");
+      serverError.value = ''
+      v$.value.$touch()
+      await nextTick()
+
+      if (v$.value.$invalid) {
+        console.log('Validation failed on the following fields:');
+        for (const [key, field] of Object.entries(v$.value)) {
+          if (field?.$invalid) {
+            console.warn(`- ${key}:`);
+            field.$errors.forEach(err => {
+              console.warn(`  Validator "${err.$validator}" failed. Value: ${field.$model}`);
+            });
+          }
+        }
         return;
       }
-
-        await window.axios.post('/Register', {
+      try {
+        const response = await proxy.axios.post('http://localhost:3000/Register', {
           username: state.username,
-          firstname: state.firstname,
-          lastname: state.lastname,
+          firstname: state.firstName,
+          lastname: state.lastName,
           email: state.email,
           country: state.country,
-          password: state.password,
-        });
-        window.toast('Registration successful', 'You can now login', 'success');
-        window.router.push('/Login');
+          password: state.password
+        })
+        console.log("Request to Register sent to Node.js server");
+        if (response.status === 201) {
+          router.push('/login');
+          console.log("Redirect to login page on server side");
+        } else {
+          serverError.value = 'Unexpected registration error'
+        }
       } catch (err) {
-        console.error('Registration error:', err);
-        state.submitError = err.response?.data?.message || 'Unexpected error.';
+        const message = (err.response?.data?.message || '').toLowerCase()
+        const status = err.response?.status || ''
+        console.error(err);
+        if (status === 409 && message.includes('username')) {
+          state.submitError = 'Username already exists'
+        } else if (status === 409 && message.includes('email')) {
+          state.submitError = 'Email already registered'
+        } else if (status === 400) {
+          state.submitError = err.response?.data?.errors?.[0]?.msg || 'Invalid registration details'
+        } else {
+          state.submitError = `Unexpected error (${status}). Please try again.`
+        }
       }
-    };
+    }
 
     return {
       state,
-      countries: ['Select a country', ...rawCountries],
-      register,
       v$,
-    };
-  },
-};
+      validations,
+      handleRegister,
+      showPassword,
+      showConfirmPassword,
+      serverError
+    }
+  }
+}
 </script>

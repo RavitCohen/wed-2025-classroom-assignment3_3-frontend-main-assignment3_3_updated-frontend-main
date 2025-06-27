@@ -14,7 +14,6 @@
 <script>
 import RecipePreviewList from "../components/RecipePreviewList.vue";
 import axios from "axios";
-import store from "../store";
 import { ref, onMounted } from "vue";
 
 export default {
@@ -25,8 +24,8 @@ export default {
 
     const loadMyRecipes = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/user/my-recipes", {
-          headers: { Authorization: `Bearer ${store.token}` }
+        const res = await axios.get("http://localhost:3000/user/recipes", {
+          withCredentials: true,
         });
         myRecipes.value = res.data;
       } catch (err) {

@@ -18,7 +18,7 @@
 
         <!-- אזור משתמש משמאל -->
         <b-navbar-nav class="d-flex align-items-center">
-          <template v-if="!store.username">
+          <template v-if="!isLoggedIn">
             <b-navbar-text class="text-white mx-2">שלום אורח</b-navbar-text>
             <router-link class="nav-link" :to="{ name: 'login' }">התחברות</router-link>
             <router-link class="nav-link" :to="{ name: 'register' }">הרשמה</router-link>
@@ -26,11 +26,16 @@
 
           <template v-else>
             <b-navbar-text class="text-white mx-2">{{ store.username }}</b-navbar-text>
-            <b-nav-item-dropdown text="אזור אישי" right>
-              <b-dropdown-item :to="{ name: 'favorites' }">המועדפים שלי</b-dropdown-item>
-              <b-dropdown-item :to="{ name: 'myRecipes' }">המתכונים שלי</b-dropdown-item>
-              <b-dropdown-item :to="{ name: 'familyRecipes' }">המשפחתיים שלי</b-dropdown-item>
-            </b-nav-item-dropdown>
+            <b-nav-item @click="toggleDropdown" class="position-relative">
+              אזור אישי
+              <div
+                class="custom-dropdown"
+                @click.stop>
+                <router-link class="dropdown-link" :to="{ name: 'favorites' }">המועדפים שלי</router-link>
+                <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">המתכונים שלי</router-link>
+                <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">המשפחתיים שלי</router-link>
+              </div>
+            </b-nav-item>
             <b-nav-item @click="showCreateModal = true">מתכון חדש</b-nav-item>
             <b-nav-item @click="logout">התנתקות</b-nav-item>
           </template>
@@ -45,8 +50,9 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref } from 'vue';
+import { getCurrentInstance, ref, computed } from 'vue';
 import CreateRecipeModal from "@/components/CreateRecipeModal.vue";
+import store from "@/store";
 
 export default {
   name: "App",
@@ -55,19 +61,19 @@ export default {
   },
   setup() {
     const internalInstance = getCurrentInstance();
-    const store = internalInstance.appContext.config.globalProperties.store;
-    const toast = internalInstance.appContext.config.globalProperties.toast;
+    // const store = internalInstance.appContext.config.globalProperties.store;
+    // const toast = internalInstance.appContext.config.globalProperties.toast;
     const router = internalInstance.appContext.config.globalProperties.$router;
-
+    const isLoggedIn = computed(() => !!store.username.value);
     const showCreateModal = ref(false);
 
     const logout = () => {
-      store.logout();
-      toast("Logout", "User logged out successfully", "success");
-      router.push("/").catch(() => {});
-    };
+    store.logout();
+    alert("התנתקת בהצלחה");
+    router.push("/login").catch(() => {});
+  };
 
-    return { store, logout, showCreateModal };
+    return { store, logout, showCreateModal, isLoggedIn };
   }
 };
 </script>

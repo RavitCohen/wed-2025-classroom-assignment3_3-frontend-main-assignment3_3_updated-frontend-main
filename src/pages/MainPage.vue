@@ -14,7 +14,7 @@
 
       <!-- עמודה ימנית: אחרונים שצפה / התחברות -->
       <BCol md="4">
-        <div v-if="!store.username" class="text-center mt-4">
+        <div v-if="!isLoggedIn" class="text-center mt-4">
           <BContainer class="text-center my-5">
             <div class="custom-alert">
               <h5 class="mb-2">ברוך הבא לאתר מתכוני סבתא 👵</h5>
@@ -40,7 +40,7 @@
           title="Last Viewed Recipes"
           :class="{
             RandomRecipes: true,
-            blur: !store.username,
+            blur: !isLoggedIn,
             center: true
           }"
           :recipes="lastViewedRecipes"
@@ -52,24 +52,28 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, onMounted } from 'vue';
+import {   ref, onMounted, computed  } from 'vue';
 import RecipePreviewList from "../components/RecipePreviewList.vue";
 import axios from 'axios';
+import store from "@/store";
+
 
 export default {
   components: {
     RecipePreviewList
   },
   setup() {
-    const internalInstance = getCurrentInstance();
-    const store = internalInstance.appContext.config.globalProperties.store;
-
+    // const internalInstance = getCurrentInstance();
+    // const store = internalInstance.appContext.config.globalProperties.store;
+    const isLoggedIn = computed(() => !!store.username.value);
     const randomRecipes = ref([]);
     const lastViewedRecipes = ref([]);
 
     const loadMoreRandom = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/recipes');
+        const res = await axios.get('http://localhost:3000/recipes', {
+          withCredentials: true,
+        });
         randomRecipes.value = res.data;
       } catch (err) {
         console.error('שגיאה בטעינת מתכונים רנדומליים:', err);
@@ -78,10 +82,8 @@ export default {
 
     const loadLastViewed = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/recipes/last-viewed', {
-          headers: {
-            Authorization: `Bearer ${store.token}`
-          }
+        const res = await axios.get('http://localhost:3000/user/watch', {
+          withCredentials: true,
         });
         lastViewedRecipes.value = res.data;
       } catch (err) {
@@ -91,12 +93,12 @@ export default {
 
     onMounted(() => {
       loadMoreRandom();
-      if (store.username) {
+      if (store.username.value) {
         loadLastViewed();
       }
     });
 
-    return { store, loadMoreRandom, randomRecipes, lastViewedRecipes };
+    return { store, loadMoreRandom, randomRecipes, lastViewedRecipes, isLoggedIn };
   }
 };
 </script>

@@ -51,10 +51,15 @@
 import { reactive } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
+import axios from 'axios';
+import { useRouter } from 'vue-router'
+import store from '../store';
 
 export default {
   name: 'LoginPage',
   setup() {
+    console.log("Got to login component");
+    const router = useRouter()
     const state = reactive({
       username: '',
       password: '',
@@ -73,16 +78,27 @@ export default {
     };
 
     const login = async () => {
+      console.log("Start login function");
       const valid = await v$.value.$validate();
-      if (!valid) return;
+      if (!valid) {
+        console.log('Validation failed on the following fields:');
+        for (const [key, field] of Object.entries(v$.value)) {
+          if (field?.$invalid) {
+            console.warn(`- ${key}:`);
+            field.$errors.forEach(err => {
+              console.warn(`  Validator "${err.$validator}" failed. Value: ${field.$model}`);
+            });
+          }}
+        return;}
 
       try {
-        await window.axios.post('/login', {
+        await axios.post('http://localhost:3000/Login', {
           username: state.username,
           password: state.password,
         });
-        window.store.login(state.username);
-        window.router.push('/main');
+        store.login(state.username);
+        console.log("Navigating to main page at /...");
+        router.push('/');
       } catch (err) {
         state.submitError = err.response?.data?.message || 'Unexpected error.';
       }

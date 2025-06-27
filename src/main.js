@@ -4,6 +4,8 @@ import routes from './router/index';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import { createRouter, createWebHistory } from 'vue-router';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -11,7 +13,27 @@ import 'bootstrap/dist/js/bootstrap.bundle.js';
 // BootstrapVue 3
 import BootstrapVue3 from 'bootstrap-vue-3';
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css';
-import { BContainer, BRow, BCol } from 'bootstrap-vue-3';
+import {
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BNavbarNav,
+  BNavbarText,
+  BCollapse,
+  BNavItem,
+  BNavItemDropdown,
+  BDropdownItem,
+  BContainer,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormSelect,
+  BFormInvalidFeedback,
+  BButton,
+  BAlert
+} from 'bootstrap-vue-3';
 import Vuelidate from '@vuelidate/core';
 
 
@@ -40,6 +62,7 @@ const store = reactive({
 // Axios interceptors
 axios.interceptors.request.use((config) => config, (error) => Promise.reject(error));
 axios.interceptors.response.use((response) => response, (error) => Promise.reject(error));
+axios.defaults.withCredentials = true;
 
 // Create app
 const app = createApp(App);
@@ -54,6 +77,22 @@ app.use(Vuelidate);
 app.component('BContainer', BContainer);
 app.component('BRow', BRow);
 app.component('BCol', BCol);
+app.component('BForm', BForm);
+app.component('BFormGroup', BFormGroup);
+app.component('BFormInput', BFormInput);
+app.component('BFormSelect', BFormSelect);
+app.component('BFormInvalidFeedback', BFormInvalidFeedback);
+app.component('BButton', BButton);
+app.component('BAlert', BAlert);
+app.component('BNavbar', BNavbar);
+app.component('BNavbarBrand', BNavbarBrand);
+app.component('BNavbarToggle', BNavbarToggle);
+app.component('BNavbarNav', BNavbarNav);
+app.component('BNavbarText', BNavbarText);
+app.component('BCollapse', BCollapse);
+app.component('BNavItem', BNavItem);
+app.component('BNavItemDropdown', BNavItemDropdown);
+app.component('BDropdownItem', BDropdownItem);
 
 // Global store
 app.config.globalProperties.store = store;
