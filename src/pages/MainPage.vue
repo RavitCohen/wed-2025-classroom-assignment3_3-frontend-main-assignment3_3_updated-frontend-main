@@ -1,17 +1,8 @@
-// MainPage.vue - עמוד מתכונים ראשי
 <template>
   <div class="container">
     <h1 class="title text-center my-4">עמוד מתכונים ראשי</h1>
 
     <BRow>
-      <!-- עמודה שמאלית: מתכונים רנדומליים -->
-      <BCol md="8">
-        <RecipePreviewList title="Random Recipes" class="RandomRecipes center" :recipes="randomRecipes" />
-        <div class="text-center mt-3">
-          <BButton variant="info" @click="loadMoreRandom">טען עוד</BButton>
-        </div>
-      </BCol>
-
       <!-- עמודה ימנית: אחרונים שצפה / התחברות -->
       <BCol md="4">
         <div v-if="!isLoggedIn" class="text-center mt-4">
@@ -47,12 +38,21 @@
           disabled
         />
       </BCol>
+
+      <!-- עמודה שמאלית: מתכונים רנדומליים -->
+      <BCol md="8">
+        <RecipePreviewList title="Random Recipes" class="RandomRecipes center" :recipes="randomRecipes" />
+        <div class="text-center mt-3">
+          <BButton variant="info" @click="loadMoreRandom">טען עוד</BButton>
+        </div>
+      </BCol>
     </BRow>
   </div>
 </template>
 
+
 <script>
-import {   ref, onMounted, computed  } from 'vue';
+import {  ref, onMounted, computed  } from 'vue';
 import RecipePreviewList from "../components/RecipePreviewList.vue";
 import axios from 'axios';
 import store from "@/store";
@@ -63,8 +63,6 @@ export default {
     RecipePreviewList
   },
   setup() {
-    // const internalInstance = getCurrentInstance();
-    // const store = internalInstance.appContext.config.globalProperties.store;
     const isLoggedIn = computed(() => !!store.username.value);
     const randomRecipes = ref([]);
     const lastViewedRecipes = ref([]);
@@ -86,6 +84,7 @@ export default {
           withCredentials: true,
         });
         lastViewedRecipes.value = res.data;
+        console.log(`last viewd by user: ${res.data}`)
       } catch (err) {
         console.error('שגיאה בטעינת צפיות אחרונות:', err);
       }

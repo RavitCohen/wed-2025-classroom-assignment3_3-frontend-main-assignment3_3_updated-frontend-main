@@ -99,8 +99,21 @@ export default {
           ...form.value,
           extendedIngredients: form.value.extendedIngredients
             .split(",")
-            .map((i) => i.trim()),
-        };
+            .map((line, index) => {
+              const parts = line.trim().split(" ");
+              const amount = parseFloat(parts[0]) || 1;
+              const unit = isNaN(parseFloat(parts[1])) ? parts[1] : '';
+              const name = parts.slice(unit ? 2 : 1).join(" ");
+
+              return {
+                id: index + 1,
+                amount,
+                unit,
+                name,
+                original: line.trim()
+              };
+            })
+          }
         await axios.post("http://localhost:3000/user/recipes/", payload, {
           withCredentials: true,
         });
@@ -108,7 +121,7 @@ export default {
         emit("update:show", false);
         alert("המתכון נשמר בהצלחה", "", "success");
 
-        // ניווט לעמוד המתכונים של המשתמש
+        // redirect to MyRecipes...
         router.push({ name: "myRecipes" });
       } catch (err) {
         console.error("שגיאה ביצירת מתכון:", err);

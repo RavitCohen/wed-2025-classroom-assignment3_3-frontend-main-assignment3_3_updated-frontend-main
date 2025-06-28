@@ -26,16 +26,19 @@
 
           <template v-else>
             <b-navbar-text class="text-white mx-2">{{ store.username }}</b-navbar-text>
-            <b-nav-item @click="toggleDropdown" class="position-relative">
-              אזור אישי
-              <div
-                class="custom-dropdown"
-                @click.stop>
-                <router-link class="dropdown-link" :to="{ name: 'favorites' }">המועדפים שלי</router-link>
-                <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">המתכונים שלי</router-link>
-                <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">המשפחתיים שלי</router-link>
-              </div>
-            </b-nav-item>
+             <div class="position-relative" @click.stop="toggleDropdown" style="cursor: pointer; color: white;">
+                  אזור אישי ▼
+                  <div
+                    v-show="isShowDropdown"
+                    class="custom-dropdown"
+                    @click.stop
+                  >
+                    <router-link class="dropdown-link" :to="{ name: 'favorites' }">המועדפים שלי</router-link>
+                    <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">המתכונים שלי</router-link>
+                    <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">המשפחתיים שלי</router-link>
+                  </div>
+                </div>
+
             <b-nav-item @click="showCreateModal = true">מתכון חדש</b-nav-item>
             <b-nav-item @click="logout">התנתקות</b-nav-item>
           </template>
@@ -52,7 +55,8 @@
 <script>
 import { getCurrentInstance, ref, computed } from 'vue';
 import CreateRecipeModal from "@/components/CreateRecipeModal.vue";
-import store from "@/store";
+import store from '@/store';
+import axios from "axios";
 
 export default {
   name: "App",
@@ -61,19 +65,30 @@ export default {
   },
   setup() {
     const internalInstance = getCurrentInstance();
-    // const store = internalInstance.appContext.config.globalProperties.store;
-    // const toast = internalInstance.appContext.config.globalProperties.toast;
+    // const router = internalInstance.appContext.config.globalProperties.$router;
+    const isShowDropdown = ref(false);
     const router = internalInstance.appContext.config.globalProperties.$router;
     const isLoggedIn = computed(() => !!store.username.value);
     const showCreateModal = ref(false);
 
-    const logout = () => {
+    const toggleDropdown = () => {
+      console.log("toggleDropdown", isShowDropdown.value);
+      isShowDropdown.value = !isShowDropdown.value;
+    };
+
+    const closeDropdown = () => {
+      console.log("closeDropdown");
+      isShowDropdown.value = false;
+    };
+
+    const logout = async () =>  {
     store.logout();
+    await axios.post('http://localhost:3000/Logout', {}, { withCredentials: true });
     alert("התנתקת בהצלחה");
     router.push("/login").catch(() => {});
   };
 
-    return { store, logout, showCreateModal, isLoggedIn };
+    return { store, logout, showCreateModal, isLoggedIn, isShowDropdown, toggleDropdown,  closeDropdown};
   }
 };
 </script>
@@ -104,5 +119,33 @@ export default {
 .b-navbar {
   font-family: 'Heebo', sans-serif;
   font-size: 1rem;
+}
+.custom-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 1000;
+  min-width: 150px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-link {
+  display: block;
+  padding: 0.25rem 0;
+  color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    background-color: #f8f9fa;
+  }
+}
+
+.b-navbar-nav {
+  position: relative; // נוסיף את זה כדי ש־custom-dropdown ימוקם נכון
+  overflow: visible !important; // זה יאפשר ל־dropdown לצאת החוצה מההורה
 }
 </style>

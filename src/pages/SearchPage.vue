@@ -31,6 +31,19 @@
           </b-col>
         </b-row>
 
+        <b-row class="mb-3">
+          <b-col md="6">
+            <b-form-group label="Limit (מספר תוצאות)">
+              <b-form-input
+                type="number"
+                v-model="query.limit"
+                :min="1"
+                :max="50"
+                placeholder="לדוג׳ 5"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
         <b-row class="text-center">
           <b-col>
             <b-button type="submit" variant="primary">חפש</b-button>
@@ -40,7 +53,7 @@
     </b-card>
 
     <!-- תוצאות חיפוש -->
-    <div v-if="recipes.length > 0" class="mt-4">
+    <div v-if="recipes && recipes.length > 0" class="mt-4">
       <h3 class="text-center">תוצאות החיפוש</h3>
       <div class="row">
         <div class="col-md-4 mb-3" v-for="r in recipes" :key="r.id">
@@ -49,7 +62,7 @@
       </div>
     </div>
 
-    <div v-else-if="searched" class="text-center mt-3">
+    <div v-else-if="searched && recipes && recipes.length === 0" class="text-center mt-3">
       <p class="text-danger">לא נמצאו תוצאות</p>
     </div>
   </div>
@@ -68,10 +81,11 @@ export default {
       recipes: [],
       searched: false,
       query: {
-        title: '',
+        query: '',
         cuisine: '',
         diet: '',
-        intolerance: ''
+        intolerance: '',
+        limit: ''
       },
       cuisineOptions: [
         '', 'African', 'Asian', 'American', 'British', 'Cajun', 'Caribbean', 'Chinese',
@@ -91,21 +105,27 @@ export default {
   },
   methods: {
     async searchRecipes() {
+      console.log("searchRecipes invoked")
       try {
         const params = {
-          title: this.query.title,
+          query: this.query.title,
           cuisine: this.query.cuisine,
           diet: this.query.diet,
-          intolerance: this.query.intolerance
+          intolerance: this.query.intolerance,
+          limit: this.query.limit
         };
         const response = await this.axios.get(this.$root.store.server_domain + '/recipes/search', { params });
-        this.recipes = response.data.recipes;
-      } catch (error) {
-        console.error('שגיאה בביצוע חיפוש:', error);
-      } finally {
-        this.searched = true;
-      }
-    }
+console.log("Recipes:", response.data);
+response.data.forEach((recipe, i) => {
+  console.log(`🔸 Recipe ${i + 1}:`, recipe);
+});
+    this.recipes = response.data;
+  } catch (error) {
+    console.error('שגיאה בביצוע חיפוש:', error);
+  } finally {
+    this.searched = true;
+  }
+  }
   }
 };
 </script>

@@ -59,6 +59,7 @@ const store = reactive({
   },
 });
 
+
 // Axios interceptors
 axios.interceptors.request.use((config) => config, (error) => Promise.reject(error));
 axios.interceptors.response.use((response) => response, (error) => Promise.reject(error));
@@ -95,8 +96,8 @@ app.component('BNavItemDropdown', BNavItemDropdown);
 app.component('BDropdownItem', BDropdownItem);
 
 // Global store
-app.config.globalProperties.store = store;
-
+// app.config.globalProperties.store = store;
+app.config.globalProperties.$store = store;
 // Mount app
 app.mount('#app');
 

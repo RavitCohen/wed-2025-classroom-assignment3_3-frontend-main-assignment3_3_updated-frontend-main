@@ -100,7 +100,13 @@ export default {
         console.log("Navigating to main page at /...");
         router.push('/');
       } catch (err) {
-        state.submitError = err.response?.data?.message || 'Unexpected error.';
+        if (err.response && err.response.status === 401) {
+          alert("שם משתמש או סיסמה לא נכונים");
+        } else {
+          console.error("שגיאה במהלך התחברות:", err);
+          state.submitError = err.response?.data?.message || 'Unexpected error.';
+        }
+        
       }
     };
 
