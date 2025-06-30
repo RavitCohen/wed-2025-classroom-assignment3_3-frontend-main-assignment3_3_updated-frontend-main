@@ -1,105 +1,142 @@
 <template>
   <div class="container mt-4" style="max-width: 500px;">
-    <h2 class="mb-4">Register</h2>
+    <h2 class="mb-4">הרשמה</h2>
     <b-form @submit.prevent="handleRegister">
-      <b-form-group label="Username" label-for="username">
+      <!-- שם משתמש -->
+      <b-form-group label="שם משתמש" label-for="username">
         <b-form-input
           id="username"
           v-model="state.username"
+          :state="validations.username.$dirty ? !validations.username.$invalid : null"
           @blur="validations.username.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.username.$error">
-          <div v-if="!validations.username.required">Username is required.</div>
+          <div v-if="!validations.username.required">שדה חובה.</div>
           <div v-else-if="!validations.username.minLength || !validations.username.maxLength">
-            Username must be 3–8 characters.
+            שם המשתמש חייב להיות בין 3–8 תווים.
           </div>
+          <div v-else-if="!validations.username.onlyLetters">
+           שם המשתמש חייב להכיל אותיות בלבד.
+          </div>
+
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="First Name" label-for="firstname">
-        <b-form-input id="firstname" v-model="state.firstName" />
+      <!-- שם פרטי -->
+      <b-form-group label="שם פרטי" label-for="firstname">
+        <b-form-input
+          id="firstname"
+          v-model="state.firstName"
+          :state="validations.firstName.$dirty ? !validations.firstName.$invalid : null"
+          @blur="validations.firstName.$touch()"
+        />
+        <b-form-invalid-feedback v-if="validations.firstName.$error">
+          שדה חובה.
+        </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="Last Name" label-for="lastname">
-        <b-form-input id="lastname" v-model="state.lastName" />
+      <!-- שם משפחה -->
+      <b-form-group label="שם משפחה" label-for="lastname">
+        <b-form-input
+          id="lastname"
+          v-model="state.lastName"
+          :state="validations.lastName.$dirty ? !validations.lastName.$invalid : null"
+          @blur="validations.lastName.$touch()"
+        />
+        <b-form-invalid-feedback v-if="validations.lastName.$error">
+          שדה חובה.
+        </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="Email" label-for="email">
-        <b-form-input id="email" type="email" v-model="state.email" />
+      <!-- אימייל -->
+      <b-form-group label="אימייל" label-for="email">
+        <b-form-input
+          id="email"
+          type="email"
+          v-model="state.email"
+          :state="validations.email.$dirty ? !validations.email.$invalid : null"
+          @blur="validations.email.$touch()"
+        />
+        <b-form-invalid-feedback v-if="validations.email.$error">
+          כתובת אימייל לא תקינה.
+        </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="Country" label-for="country">
+      <!-- מדינה -->
+      <b-form-group label="מדינה" label-for="country">
         <b-form-select
           id="country"
           v-model="state.country"
           :options="state.countries"
+          :state="validations.country.$dirty ? !validations.country.$invalid : null"
           @change="validations.country.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.country.$error">
-          Country is required.
+          חובה לבחור מדינה.
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="Password" label-for="password">
+      <!-- סיסמה -->
+      <b-form-group label="סיסמה" label-for="password">
         <b-form-input
           id="password"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           v-model="state.password"
+          :state="validations.password.$dirty ? !validations.password.$invalid : null"
           @blur="validations.password.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.password.$error">
-          <div v-if="!validations.password.required">Password is required.</div>
+          <div v-if="!validations.password.required">שדה חובה.</div>
           <div v-else-if="!validations.password.minLength || !validations.password.maxLength">
-            Password must be 5–10 characters.
+            הסיסמה חייבת להיות בין 5–10 תווים.
           </div>
-          <div v-else-if="!validations.password.hasNumber">Password must contain at least one number.</div>
-          <div v-else-if="!validations.password.hasSpecialChar">Password must contain at least one special character.</div>
+          <div v-else-if="!validations.password.hasNumber">הסיסמה חייבת לכלול לפחות ספרה אחת.</div>
+          <div v-else-if="!validations.password.hasSpecialChar">הסיסמה חייבת לכלול לפחות תו מיוחד.</div>
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group label="Confirm Password" label-for="confirmedPassword">
+      <!-- אימות סיסמה -->
+      <b-form-group label="אימות סיסמה" label-for="confirmedPassword">
         <b-form-input
           id="confirmedPassword"
-          type="password"
+          :type="showConfirmPassword ? 'text' : 'password'"
           v-model="state.confirmPassword"
+          :state="validations.confirmPassword.$dirty ? !validations.confirmPassword.$invalid : null"
           @blur="validations.confirmPassword.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.confirmPassword.$error">
-          <div v-if="!validations.confirmPassword.required">Confirmation is required.</div>
-          <div v-else-if="!validations.confirmPassword.sameAsPassword">
-            Passwords do not match.
-          </div>
+          <div v-if="!validations.confirmPassword.required">שדה חובה.</div>
+          <div v-else-if="!validations.confirmPassword.sameAsPassword">הסיסמאות אינן תואמות.</div>
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-button type="submit" variant="success" class="w-100">Register</b-button>
+      <b-button type="submit" variant="success" class="w-100">הרשמה</b-button>
 
       <b-alert variant="danger" class="mt-3" dismissible v-if="state.submitError" show>
-        Registration failed: {{ state.submitError }}
+        {{ state.submitError }}
       </b-alert>
 
       <div class="mt-2">
-        Already have an account?
-        <router-link to="/login">Login here</router-link>
+        כבר יש לך חשבון?
+        <router-link to="/login">התחבר כאן</router-link>
       </div>
     </b-form>
   </div>
 </template>
 
 <script>
-import { reactive, onMounted, nextTick, ref, computed, getCurrentInstance } from 'vue'
+import { reactive, onMounted, ref, computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, maxLength, email, sameAs } from '@vuelidate/validators'
+import axios from 'axios'
 import countries from '../assets/countries'
 import { useRouter } from 'vue-router'
 
 export default {
   name: 'RegisterPage',
   setup() {
-    const { proxy } = getCurrentInstance()
     const showPassword = ref(false)
     const showConfirmPassword = ref(false)
-    const serverError = ref('')
     const router = useRouter()
 
     const state = reactive({
@@ -117,7 +154,12 @@ export default {
     const passwordValue = computed(() => state.password)
 
     const rules = {
-      username: { required, minLength: minLength(3), maxLength: maxLength(8) },
+      username: {
+        required,
+        minLength: minLength(3),
+        maxLength: maxLength(8),
+        onlyLetters: value => /^[A-Za-z]+$/.test(value)
+      },
       firstName: { required },
       lastName: { required },
       email: { required, email },
@@ -126,12 +168,12 @@ export default {
         required,
         minLength: minLength(5),
         maxLength: maxLength(10),
-        hasNumber: value => /\d/.test(value) || 'Password must include a number',
-        hasSpecialChar: value => /[!@#$%^&*(),.?":{}|<>]/.test(value) || 'Password must include a special character'
+        hasNumber: value => /\d/.test(value),
+        hasSpecialChar: value => /[!@#$%^&*(),.?":{}|<>]/.test(value)
       },
       confirmPassword: {
         required,
-        sameAsPassword: sameAs(passwordValue, 'Passwords do not match')
+        sameAsPassword: sameAs(passwordValue)
       }
     }
 
@@ -143,25 +185,12 @@ export default {
     });
 
     const handleRegister = async () => {
-      console.log("Start handleRegister function");
-      serverError.value = ''
+      state.submitError = ''
       v$.value.$touch()
-      await nextTick()
+      if (v$.value.$invalid) return
 
-      if (v$.value.$invalid) {
-        console.log('Validation failed on the following fields:');
-        for (const [key, field] of Object.entries(v$.value)) {
-          if (field?.$invalid) {
-            console.warn(`- ${key}:`);
-            field.$errors.forEach(err => {
-              console.warn(`  Validator "${err.$validator}" failed. Value: ${field.$model}`);
-            });
-          }
-        }
-        return;
-      }
       try {
-        const response = await proxy.axios.post('http://localhost:3000/Register', {
+        const response = await axios.post('http://localhost:3000/Register', {
           username: state.username,
           firstname: state.firstName,
           lastname: state.lastName,
@@ -169,25 +198,22 @@ export default {
           country: state.country,
           password: state.password
         })
-        console.log("Request to Register sent to Node.js server");
         if (response.status === 201) {
           router.push('/login');
-          console.log("Redirect to login page on server side");
         } else {
-          serverError.value = 'Unexpected registration error'
+          state.submitError = 'שגיאה לא צפויה בהרשמה'
         }
       } catch (err) {
         const message = (err.response?.data?.message || '').toLowerCase()
         const status = err.response?.status || ''
-        console.error(err);
         if (status === 409 && message.includes('username')) {
-          state.submitError = 'Username already exists'
+          state.submitError = 'שם המשתמש כבר קיים במערכת'
         } else if (status === 409 && message.includes('email')) {
-          state.submitError = 'Email already registered'
+          state.submitError = 'האימייל כבר רשום במערכת'
         } else if (status === 400) {
-          state.submitError = err.response?.data?.errors?.[0]?.msg || 'Invalid registration details'
+          state.submitError = 'פרטי ההרשמה אינם תקינים'
         } else {
-          state.submitError = `Unexpected error (${status}). Please try again.`
+          state.submitError = 'אירעה שגיאה בלתי צפויה. אנא נסה שוב.'
         }
       }
     }
@@ -198,8 +224,7 @@ export default {
       validations,
       handleRegister,
       showPassword,
-      showConfirmPassword,
-      serverError
+      showConfirmPassword
     }
   }
 }

@@ -1,44 +1,34 @@
 <template>
-  <div class="container">
-    <h3>{{ title }}</h3>
-    
-    <div class="row">
-      <div class="col" v-for="r in recipes" :key="r.id">
-        <RecipePreview
-          class="recipePreview"
-          :recipe="r"
-          @update-favorite="(id, isFav) => $emit('update-favorite', id, isFav)"
-        />
-      </div>
+  <div class="recipe-list-container">
+    <div class="recipe-grid">
+      <RecipePreview
+        v-for="r in recipes"
+        :key="r.id"
+        :recipe="r"
+        @update-favorite="(id, isFav) => $emit('update-favorite', id, isFav)"
+        @refresh="$emit('refresh')"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import RecipePreview from "./RecipePreview.vue";
-console.log("RecipePreviewList component");
 export default {
   name: "RecipePreviewList",
-  components: {
-    RecipePreview,
-  },
-
+  components: { RecipePreview },
   props: {
-  title: {
-    type: String,
-    required: true
-  },
-  recipes: {
-    type: Array,
-    required: true
-  }},
-
-
-}
+    recipes: { type: Array, required: true }
+  }
+};
 </script>
 
 <style scoped>
-.container {
-  min-height: 400px;
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  justify-content: center;
 }
+
 </style>

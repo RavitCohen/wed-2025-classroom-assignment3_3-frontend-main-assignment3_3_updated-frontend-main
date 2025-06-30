@@ -1,46 +1,72 @@
 <template>
   <div id="app" dir="rtl">
-    <b-navbar toggleable="lg" type="dark" variant="info" class="px-4" dir="rtl">
-      <!-- צד ימין: לוגו + ניווט -->
-      <b-navbar-brand :to="{ name: 'main' }" class="font-weight-bold text-white">
-        מתכוני סבתא
+    <b-navbar toggleable="lg" type="dark" variant="dark" class="main-navbar">
+      <!-- Brand -->
+      <b-navbar-brand :to="{ name: 'main' }" class="brand">
+        🍲 מתכוני סבתא
       </b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse" />
 
-      <b-collapse id="nav-collapse" is-nav class="w-100 d-flex justify-content-between">
-        <!-- קישורים מימין -->
-        <b-navbar-nav class="d-flex align-items-center">
-          <router-link class="nav-link" :to="{ name: 'main' }">דף הבית</router-link>
-          <router-link class="nav-link" :to="{ name: 'search' }">חיפוש</router-link>
-          <router-link class="nav-link" :to="{ name: 'about' }">אודות</router-link>
-        </b-navbar-nav>
+      <b-collapse id="nav-collapse" is-nav class="w-100">
+        <b-navbar-nav class="align-items-center w-100">
+          <!-- קישורים ראשיים -->
+          <router-link class="nav-link" :to="{ name: 'main' }">
+            <i class="bi bi-house"></i> דף הבית
+          </router-link>
+          <router-link class="nav-link" :to="{ name: 'search' }">
+            <i class="bi bi-search"></i> חיפוש
+          </router-link>
+          <router-link class="nav-link" :to="{ name: 'about' }">
+            <i class="bi bi-info-circle"></i> אודות
+          </router-link>
 
-        <!-- אזור משתמש משמאל -->
-        <b-navbar-nav class="d-flex align-items-center">
+          <!-- Spacer -->
+          <div class="flex-fill"></div>
+
+          <!-- אזור משתמש -->
           <template v-if="!isLoggedIn">
-            <b-navbar-text class="text-white mx-2">שלום אורח</b-navbar-text>
-            <router-link class="nav-link" :to="{ name: 'login' }">התחברות</router-link>
-            <router-link class="nav-link" :to="{ name: 'register' }">הרשמה</router-link>
+            <b-navbar-text class="text-light mx-2">שלום אורח</b-navbar-text>
+            <router-link class="nav-link" :to="{ name: 'login' }">
+              <i class="bi bi-box-arrow-in-right"></i> התחברות
+            </router-link>
+            <router-link class="nav-link" :to="{ name: 'register' }">
+              <i class="bi bi-person-plus"></i> הרשמה
+            </router-link>
           </template>
 
           <template v-else>
-            <b-navbar-text class="text-white mx-2">{{ store.username }}</b-navbar-text>
-             <div class="position-relative" @click.stop="toggleDropdown" style="cursor: pointer; color: white;">
-                  אזור אישי ▼
-                  <div
-                    v-show="isShowDropdown"
-                    class="custom-dropdown"
-                    @click.stop
-                  >
-                    <router-link class="dropdown-link" :to="{ name: 'favorites' }">המועדפים שלי</router-link>
-                    <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">המתכונים שלי</router-link>
-                    <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">המשפחתיים שלי</router-link>
-                  </div>
-                </div>
+            <b-navbar-text class="text-light mx-2 font-weight-bold">{{ store.username }}</b-navbar-text>
+            <div
+              class="position-relative"
+              @click.stop="toggleDropdown"
+              style="cursor: pointer; color: white;"
+              aria-label="אזור אישי"
+            >
+              אזור אישי ▼
+              <div
+                v-show="isShowDropdown"
+                class="custom-dropdown"
+                @click.stop
+              >
+                <router-link class="dropdown-link" :to="{ name: 'favorites' }">
+                  ❤️ המועדפים שלי
+                </router-link>
+                <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">
+                  📝 המתכונים שלי
+                </router-link>
+                <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">
+                  👨‍👩‍👧‍👦 המשפחתיים שלי
+                </router-link>
+              </div>
+            </div>
 
-            <b-nav-item @click="showCreateModal = true">מתכון חדש</b-nav-item>
-            <b-nav-item @click="logout">התנתקות</b-nav-item>
+            <b-nav-item @click="showCreateModal = true">
+              ➕ מתכון חדש
+            </b-nav-item>
+            <b-nav-item @click="logout">
+              🚪 התנתקות
+            </b-nav-item>
           </template>
         </b-navbar-nav>
       </b-collapse>
@@ -53,42 +79,53 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed } from 'vue';
+import { getCurrentInstance, ref, computed, onMounted, onUnmounted } from 'vue';
 import CreateRecipeModal from "@/components/CreateRecipeModal.vue";
 import store from '@/store';
 import axios from "axios";
 
 export default {
   name: "App",
-  components: {
-    CreateRecipeModal
-  },
+  components: { CreateRecipeModal },
   setup() {
     const internalInstance = getCurrentInstance();
-    // const router = internalInstance.appContext.config.globalProperties.$router;
-    const isShowDropdown = ref(false);
     const router = internalInstance.appContext.config.globalProperties.$router;
     const isLoggedIn = computed(() => !!store.username.value);
     const showCreateModal = ref(false);
+    const isShowDropdown = ref(false);
 
     const toggleDropdown = () => {
-      console.log("toggleDropdown", isShowDropdown.value);
       isShowDropdown.value = !isShowDropdown.value;
     };
 
     const closeDropdown = () => {
-      console.log("closeDropdown");
       isShowDropdown.value = false;
     };
 
-    const logout = async () =>  {
-    store.logout();
-    await axios.post('http://localhost:3000/Logout', {}, { withCredentials: true });
-    alert("התנתקת בהצלחה");
-    router.push("/login").catch(() => {});
-  };
+    const logout = async () => {
+      store.logout();
+      await axios.post('http://localhost:3000/Logout', {}, { withCredentials: true });
+      alert("התנתקת בהצלחה");
+      router.push
+      router.push("/login").catch(() => {});
+    };
 
-    return { store, logout, showCreateModal, isLoggedIn, isShowDropdown, toggleDropdown,  closeDropdown};
+    onMounted(() => {
+      document.addEventListener('click', closeDropdown);
+    });
+    onUnmounted(() => {
+      document.removeEventListener('click', closeDropdown);
+    });
+
+    return {
+      store,
+      logout,
+      showCreateModal,
+      isLoggedIn,
+      isShowDropdown,
+      toggleDropdown,
+      closeDropdown
+    };
   }
 };
 </script>
@@ -97,29 +134,58 @@ export default {
 @import "@/scss/form-style.scss";
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  font-family: 'Heebo', sans-serif;
   min-height: 100vh;
+  background: #f6f8fa;
+  color: #2c3e50;
+}
+
+/* Navbar */
+.main-navbar {
+  background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.brand {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffffff !important;
 }
 
 .nav-link {
-  color: white !important;
+  color: #ffffff !important;
+  margin: 0 0.7rem;
   font-weight: 500;
-  margin: 0 10px;
-  transition: 0.2s;
-
-  &:hover {
-    color: #dff6ff !important;
-    text-decoration: underline;
-  }
+  position: relative;
+  transition: color 0.2s;
 }
 
-.b-navbar {
-  font-family: 'Heebo', sans-serif;
-  font-size: 1rem;
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #ffffff;
+  transition: width 0.3s ease;
 }
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.b-navbar-nav .nav-link {
+  display: flex;
+  align-items: center;
+}
+
+.b-navbar-nav .bi {
+  margin-left: 0.3rem;
+}
+
+/* Dropdown Custom */
 .custom-dropdown {
   position: absolute;
   top: 100%;
@@ -129,7 +195,7 @@ export default {
   z-index: 1000;
   min-width: 150px;
   padding: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .dropdown-link {
@@ -144,8 +210,9 @@ export default {
   }
 }
 
-.b-navbar-nav {
-  position: relative; // נוסיף את זה כדי ש־custom-dropdown ימוקם נכון
-  overflow: visible !important; // זה יאפשר ל־dropdown לצאת החוצה מההורה
+@media (max-width: 992px) {
+  .nav-link {
+    margin: 0.5rem 0;
+  }
 }
 </style>

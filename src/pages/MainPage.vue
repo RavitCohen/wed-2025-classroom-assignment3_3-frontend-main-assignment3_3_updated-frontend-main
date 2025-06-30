@@ -1,66 +1,64 @@
 <template>
-  <div class="container">
-    <h1 class="title text-center my-4">עמוד מתכונים ראשי</h1>
+  <div class="container py-4">
+    <h1 class="title text-center mb-4">עמוד מתכונים ראשי</h1>
 
-    <BRow>
-      <!-- עמודה ימנית: אחרונים שצפה / התחברות -->
-      <BCol md="4">
-        <div v-if="!isLoggedIn" class="text-center mt-4">
-          <BContainer class="text-center my-5">
-            <div class="custom-alert">
-              <h5 class="mb-2">ברוך הבא לאתר מתכוני סבתא 👵</h5>
-              <p class="mb-0">כדי לצפות במתכונים שצפית לאחרונה – התחבר או הירשם</p>
-            </div>
-            <BRow class="justify-content-center mt-3">
-              <BCol cols="auto">
-                <router-link :to="{ name: 'login' }">
-                  <BButton variant="primary">התחברות</BButton>
-                </router-link>
-              </BCol>
-              <BCol cols="auto">
-                <router-link :to="{ name: 'register' }">
-                  <BButton variant="success">הרשמה</BButton>
-                </router-link>
-              </BCol>
-            </BRow>
-          </BContainer>
+    <!-- שורת כותרות -->
+    <div class="titles-row">
+      <div class="title-col">המתכונים שצפית לאחרונה</div>
+      <div class="title-col">מתכונים מומלצים</div>
+    </div>
+
+    <div class="recipes-wrapper">
+      <!-- עמודה ימין -->
+      <div class="recipes-section">
+        <div v-if="!isLoggedIn">
+          <h3 class="mb-3 text-center">👵 ברוך הבא לאתר מתכוני סבתא</h3>
+          <p class="text-center">כדי לצפות במתכונים שצפית לאחרונה, התחבר או הירשם:</p>
+
+          <!-- כאן הטופס המלא -->
+          <LoginPage />
+
         </div>
+        <div v-else class="recipes-list-vertical">
+          <RecipePreview
+            v-for="r in lastViewedRecipes"
+            :key="r.id"
+            :recipe="r"
+          />
+        </div>
+      </div>
 
-        <RecipePreviewList
-          v-else
-          title="Last Viewed Recipes"
-          :class="{
-            RandomRecipes: true,
-            blur: !isLoggedIn,
-            center: true
-          }"
-          :recipes="lastViewedRecipes"
-          disabled
-        />
-      </BCol>
-
-      <!-- עמודה שמאלית: מתכונים רנדומליים -->
-      <BCol md="8">
-        <RecipePreviewList title="Random Recipes" class="RandomRecipes center" :recipes="randomRecipes" />
+      <!-- עמודה שמאל -->
+      <div class="recipes-section">
+        <div class="recipes-list-vertical">
+          <RecipePreview
+            v-for="r in randomRecipes"
+            :key="r.id"
+            :recipe="r"
+          />
+        </div>
         <div class="text-center mt-3">
-          <BButton variant="info" @click="loadMoreRandom">טען עוד</BButton>
+          <b-button variant="info" @click="loadMoreRandom">טען עוד מתכונים</b-button>
         </div>
-      </BCol>
-    </BRow>
+      </div>
+    </div>
   </div>
 </template>
 
 
+
+
 <script>
-import {  ref, onMounted, computed  } from 'vue';
-import RecipePreviewList from "../components/RecipePreviewList.vue";
+import { ref, onMounted, computed } from 'vue';
+import LoginPage from "./LoginPage.vue";
+import RecipePreview from "../components/RecipePreview.vue";
 import axios from 'axios';
 import store from "@/store";
 
-
 export default {
   components: {
-    RecipePreviewList
+    RecipePreview,
+    LoginPage
   },
   setup() {
     const isLoggedIn = computed(() => !!store.username.value);
@@ -84,7 +82,6 @@ export default {
           withCredentials: true,
         });
         lastViewedRecipes.value = res.data;
-        console.log(`last viewd by user: ${res.data}`)
       } catch (err) {
         console.error('שגיאה בטעינת צפיות אחרונות:', err);
       }
@@ -102,16 +99,64 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.RandomRecipes {
-  margin: 10px 0 10px;
+
+
+<style scoped>
+.titles-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
 }
-.blur {
-  -webkit-filter: blur(5px);
-  filter: blur(2px);
+
+.title-col {
+  flex: 0 0 48%;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.3rem;
 }
-::v-deep .blur .recipe-preview {
-  pointer-events: none;
-  cursor: default;
+
+.recipes-wrapper {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  justify-content: center;
 }
+
+.recipes-section {
+  flex: 0 0 48%;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fafafa;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipes-list-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 992px) {
+  .titles-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .title-col {
+    flex: 1 1 100%;
+  }
+  .recipes-wrapper {
+    flex-direction: column;
+  }
+  .recipes-section {
+    flex: 1 1 100%;
+  }
+}
+
+
 </style>
+
