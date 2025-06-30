@@ -105,10 +105,9 @@ export default {
     const logout = async () => {
       store.logout();
       await axios.post('http://localhost:3000/Logout', {}, { withCredentials: true });
-      alert("התנתקת בהצלחה");
-      router.push
-      router.push("/login").catch(() => {});
+      router.push({ name: 'login', query: { logout: '1' } }).catch(() => {});
     };
+
 
     onMounted(() => {
       document.addEventListener('click', closeDropdown);

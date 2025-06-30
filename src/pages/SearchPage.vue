@@ -14,10 +14,7 @@
           </b-col>
           <b-col md="4">
             <b-form-group label="Limit (מספר תוצאות)" label-align="center">
-              <b-form-select
-                v-model="query.limit"
-                :options="limitOptions"
-              />
+              <b-form-select v-model="query.limit" :options="limitOptions" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -52,23 +49,10 @@
       </b-form>
     </b-card>
 
-    <!-- תוצאות החיפוש -->
+    <!-- תוצאות -->
     <div v-if="recipes && recipes.length > 0" class="mt-4">
       <h3 class="text-center mb-3">תוצאות החיפוש</h3>
-      <div class="search-results">
-        <div
-          class="result-card"
-          v-for="r in recipes"
-          :key="r.id"
-          @click="$router.push('/recipe/' + r.id)"
-        >
-          <img :src="r.image" alt="תמונת מתכון" class="result-image" />
-          <div class="result-info">
-            <h5 class="result-title">{{ r.title }}</h5>
-            <p class="result-time">⏱ זמן הכנה: {{ r.readyInMinutes }} דקות</p>
-          </div>
-        </div>
-      </div>
+      <RecipePreviewList :recipes="recipes" @refresh="searchRecipes" />
     </div>
 
     <div v-else-if="searched && recipes && recipes.length === 0" class="text-center mt-3">
@@ -77,10 +61,12 @@
   </div>
 </template>
 
-
 <script>
+import RecipePreviewList from "@/components/RecipePreviewList.vue";
+
 export default {
   name: 'SearchPage',
+  components: { RecipePreviewList },
   data() {
     return {
       limitOptions: [
@@ -154,50 +140,5 @@ export default {
 .search-button {
   width: 100%;
   font-size: 1.1rem;
-}
-
-.search-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.result-card {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  cursor: pointer;
-  background-color: #fff;
-  transition: box-shadow 0.2s;
-}
-
-.result-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.result-image {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 0.4rem;
-  margin-left: 0.75rem;
-}
-
-.result-info {
-  flex-grow: 1;
-}
-
-.result-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.result-time {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0.3rem 0 0 0;
 }
 </style>

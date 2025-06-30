@@ -7,7 +7,7 @@
         <b-form-input
           id="username"
           v-model="state.username"
-          :state="getValidationState(v$.username)"
+          @input="hideLogoutMessage"
           placeholder="👤 הכנס שם משתמש"
         />
         <b-form-invalid-feedback v-if="v$.username.$error">
@@ -21,7 +21,7 @@
           id="password"
           type="password"
           v-model="state.password"
-          :state="getValidationState(v$.password)"
+          @input="hideLogoutMessage"
           placeholder="🔒 הכנס סיסמה"
         />
         <b-form-invalid-feedback v-if="v$.password.$error">
@@ -31,56 +31,76 @@
 
       <b-button type="submit" variant="primary" class="w-100">התחבר</b-button>
 
-      <!-- Alert לשם משתמש/סיסמה שגויים -->
-      <b-alert
-        variant="info"
-        class="mt-3"
-        dismissible
-        v-if="state.invalidCredentials"
-        show
+      <!-- הודעת התנתקות -->
+      <div
+        v-if="logoutSuccess"
+        class="alert alert-info mt-3 text-center"
+        role="alert"
       >
-        שם המשתמש או הסיסמה אינם נכונים. בדוק ונסה שוב.
-      </b-alert>
+        התנתקת בהצלחה.
+      </div>
 
-      <!-- Alert לשגיאות כלליות -->
-      <b-alert
-        variant="danger"
-        class="mt-3"
-        dismissible
+      <!-- הודעת שגיאה על סיסמה שגויה -->
+      <div
+        v-if="state.invalidCredentials"
+        class="alert alert-danger mt-3 text-center"
+        role="alert"
+      >
+        שם המשתמש או הסיסמה שגויים. נסה שוב.
+      </div>
+
+      <!-- הודעת הצלחה -->
+      <div
+        v-if="state.loginSuccess"
+        class="alert alert-success mt-3 text-center"
+        role="alert"
+      >
+        התחברת בהצלחה!
+      </div>
+
+      <!-- הודעת שגיאה כללית -->
+      <div
         v-if="state.submitError"
-        show
+        class="alert alert-danger mt-3 text-center"
+        role="alert"
       >
         ההתחברות נכשלה: {{ state.submitError }}
-      </b-alert>
-
-      <div class="mt-3 text-center">
-        אין לך חשבון?
-        <router-link to="/register" class="register-link">
-          להרשמה לחץ כאן
-        </router-link>
       </div>
     </b-form>
+
+    <div class="mt-3 text-center">
+      אין לך חשבון?
+      <router-link to="/register" class="register-link">
+        להרשמה לחץ כאן
+      </router-link>
+    </div>
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import store from '../store';
 
 export default {
   name: 'LoginPage',
   setup() {
     const router = useRouter();
+    const route = useRoute();
+
     const state = reactive({
       username: '',
       password: '',
       submitError: null,
       invalidCredentials: false,
+      loginSuccess: false,
+      hideLogoutSuccess: false
     });
+
+    const logoutSuccess = computed(() => route.query.logout === '1' && !state.hideLogoutSuccess);
 
     const rules = {
       username: { required },
@@ -93,9 +113,14 @@ export default {
       return field.$dirty ? !field.$invalid : null;
     };
 
+    const hideLogoutMessage = () => {
+      state.hideLogoutSuccess = true;
+    };
+
     const login = async () => {
       state.invalidCredentials = false;
       state.submitError = null;
+      state.loginSuccess = false;
 
       const valid = await v$.value.$validate();
       if (!valid) return;
@@ -105,19 +130,20 @@ export default {
           username: state.username,
           password: state.password,
         });
+
         store.login(state.username);
-        router.push('/');
+
+        state.loginSuccess = true;
+
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
       } catch (err) {
         const status = err.response?.status;
         const message = err.response?.data?.message;
 
-        if (
-          status === 401 ||
-          message === 'Invalid credentials' ||
-          message === 'Unauthorized'
-        ) {
+        if (status === 401) {
           state.invalidCredentials = true;
-          alert("שם המשתמש או הסיסמה לא נכונים.");
         } else if (message) {
           state.submitError = message;
         } else {
@@ -126,7 +152,14 @@ export default {
       }
     };
 
-    return { state, v$, login, getValidationState };
+    return {
+      state,
+      v$,
+      login,
+      getValidationState,
+      logoutSuccess,
+      hideLogoutMessage
+    };
   },
 };
 </script>

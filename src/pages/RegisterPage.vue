@@ -2,33 +2,29 @@
   <div class="container mt-4" style="max-width: 500px;">
     <h2 class="mb-4">הרשמה</h2>
     <b-form @submit.prevent="handleRegister">
+
       <!-- שם משתמש -->
-      <b-form-group label="שם משתמש" label-for="username">
+      <b-form-group label="שם משתמש">
         <b-form-input
-          id="username"
           v-model="state.username"
           :state="validations.username.$dirty ? !validations.username.$invalid : null"
-          @blur="validations.username.$touch()"
+          @input="validations.username.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.username.$error">
-          <div v-if="!validations.username.required">שדה חובה.</div>
-          <div v-else-if="!validations.username.minLength || !validations.username.maxLength">
-            שם המשתמש חייב להיות בין 3–8 תווים.
-          </div>
-          <div v-else-if="!validations.username.onlyLetters">
-           שם המשתמש חייב להכיל אותיות בלבד.
-          </div>
-
+          <template v-for="error in validations.username.$errors" :key="error.$uid">
+            <div>{{ error.$message }}</div>
+          </template>
         </b-form-invalid-feedback>
+
+
       </b-form-group>
 
       <!-- שם פרטי -->
-      <b-form-group label="שם פרטי" label-for="firstname">
+      <b-form-group label="שם פרטי">
         <b-form-input
-          id="firstname"
           v-model="state.firstName"
           :state="validations.firstName.$dirty ? !validations.firstName.$invalid : null"
-          @blur="validations.firstName.$touch()"
+          @input="validations.firstName.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.firstName.$error">
           שדה חובה.
@@ -36,12 +32,11 @@
       </b-form-group>
 
       <!-- שם משפחה -->
-      <b-form-group label="שם משפחה" label-for="lastname">
+      <b-form-group label="שם משפחה">
         <b-form-input
-          id="lastname"
           v-model="state.lastName"
           :state="validations.lastName.$dirty ? !validations.lastName.$invalid : null"
-          @blur="validations.lastName.$touch()"
+          @input="validations.lastName.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.lastName.$error">
           שדה חובה.
@@ -49,23 +44,24 @@
       </b-form-group>
 
       <!-- אימייל -->
-      <b-form-group label="אימייל" label-for="email">
-        <b-form-input
-          id="email"
-          type="email"
-          v-model="state.email"
-          :state="validations.email.$dirty ? !validations.email.$invalid : null"
-          @blur="validations.email.$touch()"
-        />
-        <b-form-invalid-feedback v-if="validations.email.$error">
-          כתובת אימייל לא תקינה.
-        </b-form-invalid-feedback>
-      </b-form-group>
+      <b-form-group label="אימייל">
+      <b-form-input
+        type="email"
+        v-model="state.email"
+        :state="validations.email.$dirty ? !validations.email.$invalid : null"
+        @input="validations.email.$touch()"
+      />
+      <b-form-invalid-feedback v-if="validations.email.$error">
+        <template v-for="error in validations.email.$errors" :key="error.$uid">
+          <div>{{ error.$message }}</div>
+        </template>
+      </b-form-invalid-feedback>
+    </b-form-group>
+
 
       <!-- מדינה -->
-      <b-form-group label="מדינה" label-for="country">
+      <b-form-group label="מדינה">
         <b-form-select
-          id="country"
           v-model="state.country"
           :options="state.countries"
           :state="validations.country.$dirty ? !validations.country.$invalid : null"
@@ -77,44 +73,47 @@
       </b-form-group>
 
       <!-- סיסמה -->
-      <b-form-group label="סיסמה" label-for="password">
+      <b-form-group label="סיסמה">
         <b-form-input
-          id="password"
           :type="showPassword ? 'text' : 'password'"
           v-model="state.password"
           :state="validations.password.$dirty ? !validations.password.$invalid : null"
-          @blur="validations.password.$touch()"
+          @input="validations.password.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.password.$error">
-          <div v-if="!validations.password.required">שדה חובה.</div>
-          <div v-else-if="!validations.password.minLength || !validations.password.maxLength">
-            הסיסמה חייבת להיות בין 5–10 תווים.
-          </div>
-          <div v-else-if="!validations.password.hasNumber">הסיסמה חייבת לכלול לפחות ספרה אחת.</div>
-          <div v-else-if="!validations.password.hasSpecialChar">הסיסמה חייבת לכלול לפחות תו מיוחד.</div>
+          <template v-for="error in validations.password.$errors" :key="error.$uid">
+            <div>{{ error.$message }}</div>
+          </template>
         </b-form-invalid-feedback>
+
       </b-form-group>
 
       <!-- אימות סיסמה -->
-      <b-form-group label="אימות סיסמה" label-for="confirmedPassword">
+      <b-form-group label="אימות סיסמה">
         <b-form-input
-          id="confirmedPassword"
           :type="showConfirmPassword ? 'text' : 'password'"
           v-model="state.confirmPassword"
           :state="validations.confirmPassword.$dirty ? !validations.confirmPassword.$invalid : null"
-          @blur="validations.confirmPassword.$touch()"
+          @input="validations.confirmPassword.$touch()"
         />
         <b-form-invalid-feedback v-if="validations.confirmPassword.$error">
-          <div v-if="!validations.confirmPassword.required">שדה חובה.</div>
-          <div v-else-if="!validations.confirmPassword.sameAsPassword">הסיסמאות אינן תואמות.</div>
+          <template v-for="error in validations.confirmPassword.$errors" :key="error.$uid">
+            <div>{{ error.$message }}</div>
+          </template>
         </b-form-invalid-feedback>
+
+
       </b-form-group>
 
       <b-button type="submit" variant="success" class="w-100">הרשמה</b-button>
 
-      <b-alert variant="danger" class="mt-3" dismissible v-if="state.submitError" show>
+      <!-- הודעת שגיאה/הצלחה כללית -->
+      <div v-if="state.submitError" class="mt-3 text-danger font-weight-bold">
         {{ state.submitError }}
-      </b-alert>
+      </div>
+      <div v-if="state.successMessage" class="mt-3 text-success font-weight-bold">
+        {{ state.successMessage }}
+      </div>
 
       <div class="mt-2">
         כבר יש לך חשבון?
@@ -127,7 +126,7 @@
 <script>
 import { reactive, onMounted, ref, computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, minLength, maxLength, email, sameAs } from '@vuelidate/validators'
+import { required, minLength, maxLength, email, sameAs, helpers } from '@vuelidate/validators'
 import axios from 'axios'
 import countries from '../assets/countries'
 import { useRouter } from 'vue-router'
@@ -148,33 +147,41 @@ export default {
       password: '',
       confirmPassword: '',
       countries: [],
-      submitError: ''
+      submitError: '',
+      successMessage: ''
     })
 
     const passwordValue = computed(() => state.password)
 
     const rules = {
       username: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(8),
-        onlyLetters: value => /^[A-Za-z]+$/.test(value)
+        required: helpers.withMessage('שדה חובה.', required),
+        minLength: helpers.withMessage('שם המשתמש חייב להיות לפחות 3 תווים.', minLength(3)),
+        maxLength: helpers.withMessage('שם המשתמש לא יכול להיות ארוך מ-8 תווים.', maxLength(8)),
+        onlyLetters: helpers.withMessage(
+          'שם המשתמש חייב להכיל אותיות באנגלית בלבד.',
+          value => /^[A-Za-z]+$/.test(value)
+        )
       },
       firstName: { required },
       lastName: { required },
-      email: { required, email },
+      email: {
+        required: helpers.withMessage('שדה חובה.', required),
+        email: helpers.withMessage('כתובת אימייל לא תקינה.', email)
+      },
       country: { required },
       password: {
-        required,
-        minLength: minLength(5),
-        maxLength: maxLength(10),
-        hasNumber: value => /\d/.test(value),
-        hasSpecialChar: value => /[!@#$%^&*(),.?":{}|<>]/.test(value)
+        required: helpers.withMessage('שדה חובה.', required),
+        minLength: helpers.withMessage('הסיסמה חייבת להיות לפחות באורך 5 תווים.', minLength(5)),
+        maxLength: helpers.withMessage('הסיסמה לא יכולה להיות ארוכה מ-10 תווים.', maxLength(10)),
+        hasNumber: helpers.withMessage('הסיסמה חייבת לכלול לפחות ספרה אחת.', value => /\d/.test(value)),
+        hasSpecialChar: helpers.withMessage('הסיסמה חייבת לכלול לפחות תו מיוחד.', value => /[!@#$%^&*(),.?":{}|<>]/.test(value))
       },
       confirmPassword: {
-        required,
-        sameAsPassword: sameAs(passwordValue)
+        required: helpers.withMessage('שדה חובה.', required),
+        sameAsPassword: helpers.withMessage('הסיסמאות אינן תואמות.', sameAs(passwordValue))
       }
+
     }
 
     const v$ = useVuelidate(rules, state)
@@ -186,6 +193,7 @@ export default {
 
     const handleRegister = async () => {
       state.submitError = ''
+      state.successMessage = ''
       v$.value.$touch()
       if (v$.value.$invalid) return
 
@@ -199,7 +207,10 @@ export default {
           password: state.password
         })
         if (response.status === 201) {
-          router.push('/login');
+          state.successMessage = "ההרשמה בוצעה בהצלחה! מעבירים לעמוד ההתחברות..."
+          setTimeout(() => {
+            router.push('/login');
+          }, 1500);
         } else {
           state.submitError = 'שגיאה לא צפויה בהרשמה'
         }
@@ -227,3 +238,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.b-form-invalid-feedback {
+  font-size: 0.9rem;
+}
+.b-form-group {
+  margin-bottom: 1.25rem;
+}
+.text-success {
+  font-size: 1.1rem;
+}
+</style>

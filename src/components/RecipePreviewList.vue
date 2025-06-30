@@ -25,10 +25,13 @@ export default {
 
 <style scoped>
 .recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   justify-content: center;
 }
+
+
+
 
 </style>

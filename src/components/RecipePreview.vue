@@ -17,12 +17,12 @@
           <b-badge v-if="recipe.vegan" variant="success" class="badge-item">🌱 טבעוני</b-badge>
           <b-badge v-if="recipe.glutenFree" variant="warning" class="badge-item">🚫 גלוטן</b-badge>
           <b-badge v-if="recipe.isWatched" variant="info" class="badge-item">👁️ נצפה</b-badge>
-          <b-badge v-if="recipe.isFavoriteByUser" variant="danger" class="badge-item">❤️ מועדף</b-badge>
+          <b-badge v-if="isFavorite" variant="danger" class="badge-item">❤️ מועדף</b-badge>
         </div>
 
         <div v-if="isLoggedIn">
           <b-button
-            v-if="!recipe.isFavoriteByUser"
+            v-if="!isFavorite"
             variant="outline-danger"
             size="sm"
             @click.stop="markAsFavorite"
@@ -45,16 +45,18 @@
 
 <script>
 import store from "@/store";
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export default {
   name: "RecipePreview",
   props: {
     recipe: { type: Object, required: true }
   },
-  setup() {
+  setup(props) {
     const isLoggedIn = computed(() => !!store.username.value);
-    return { isLoggedIn };
+    // ניהול מצב פנימי של מועדף
+    const isFavorite = ref(props.recipe.isFavoriteByUser || false);
+    return { isLoggedIn, isFavorite };
   },
   methods: {
     async handleClick() {
@@ -76,8 +78,8 @@ export default {
           { recipeID: this.recipe.id },
           { withCredentials: true }
         );
+        this.isFavorite = true;
         this.$emit("update-favorite", this.recipe.id, true);
-        alert("❤️ נוסף למועדפים!");
       } catch (err) {
         console.error("שגיאה בסימון מועדף", err);
       }
@@ -88,6 +90,7 @@ export default {
           `${this.$root.store.server_domain}/user/favorites/${this.recipe.id}`,
           { withCredentials: true }
         );
+        this.isFavorite = false;
         this.$emit("update-favorite", this.recipe.id, false);
         this.$emit("refresh");
       } catch (err) {
@@ -100,29 +103,46 @@ export default {
 
 <style scoped>
 .recipe-card-horizontal {
-  border: 1px solid #eee;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  transition: box-shadow 0.2s;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
   background: #fff;
-  min-height: 130px;
+  min-height: 150px; 
 }
 
 .recipe-card-horizontal:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.recipe-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
 }
 
 .recipe-image-horizontal {
   width: 120px;
   height: 100px;
   object-fit: cover;
-  border-radius: 0.35rem;
+  border-radius: 0.5rem;
 }
 
-.recipe-details {
-  display: flex;
-  flex-direction: column;
+.card-title {
+  font-weight: 700;       
+  font-size: 1.15rem;    
+  color: #222;           
+}
+
+.card-text {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.recipe-details b-button {
+  font-weight: 600;
 }
 
 .badges {
@@ -131,22 +151,19 @@ export default {
 }
 
 .badge-item {
-  font-size: 0.8rem;
+  font-size: 0.85rem;   
 }
 
-/* רספונסיבי – במובייל הופך לאנכי */
 @media (max-width: 576px) {
   .recipe-card-horizontal {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .recipe-image-horizontal {
     width: 100%;
     height: 150px;
     margin-bottom: 0.5rem;
   }
-
   .recipe-details {
     width: 100%;
   }

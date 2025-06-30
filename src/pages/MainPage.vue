@@ -70,6 +70,7 @@ export default {
         const res = await axios.get('http://localhost:3000/recipes', {
           withCredentials: true,
         });
+        console.log("Random recipes:", res.data);
         randomRecipes.value = res.data;
       } catch (err) {
         console.error('שגיאה בטעינת מתכונים רנדומליים:', err);

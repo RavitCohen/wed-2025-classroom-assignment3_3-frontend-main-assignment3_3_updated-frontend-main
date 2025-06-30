@@ -16,6 +16,7 @@
     "bootstrap-vue-3": "^0.5.1",
     "core-js": "^3.30.1",
     "dotenv": "^16.5.0",
+    "mitt": "^3.0.1",
     "vue": "^3.3.4",
     "vue-axios": "^3.4.1",
     "vue-router": "^4.2.5"
