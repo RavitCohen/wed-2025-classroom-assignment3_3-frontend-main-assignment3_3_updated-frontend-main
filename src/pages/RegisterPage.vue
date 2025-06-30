@@ -208,10 +208,8 @@ export default {
         const status = err.response?.status || ''
         if (status === 409 && message.includes('username')) {
           state.submitError = 'שם המשתמש כבר קיים במערכת'
-        } else if (status === 409 && message.includes('email')) {
+        } else if (status === 409 && message.includes('Email')) {
           state.submitError = 'האימייל כבר רשום במערכת'
-        } else if (status === 400) {
-          state.submitError = 'פרטי ההרשמה אינם תקינים'
         } else {
           state.submitError = 'אירעה שגיאה בלתי צפויה. אנא נסה שוב.'
         }
