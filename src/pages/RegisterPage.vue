@@ -208,7 +208,7 @@ export default {
         const status = err.response?.status || ''
         if (status === 409 && message.includes('username')) {
           state.submitError = 'שם המשתמש כבר קיים במערכת'
-        } else if (status === 409 && message.includes('Email')) {
+        } else if (status === 409 && message.includes('email')) {
           state.submitError = 'האימייל כבר רשום במערכת'
         } else {
           state.submitError = 'אירעה שגיאה בלתי צפויה. אנא נסה שוב.'
