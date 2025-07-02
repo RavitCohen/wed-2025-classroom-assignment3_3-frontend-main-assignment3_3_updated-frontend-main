@@ -24,17 +24,14 @@
         <b-form-input v-model="form.image" type="url" />
       </b-form-group>
 
-      <b-form-group label="האם טבעוני?">
-        <b-form-checkbox v-model="form.vegan">כן</b-form-checkbox>
+      <b-form-group label="מאפייני תזונה">
+        <div class="d-flex flex-wrap gap-3">
+          <b-form-checkbox v-model="form.vegan">טבעוני</b-form-checkbox>
+          <b-form-checkbox v-model="form.vegetarian">צמחוני</b-form-checkbox>
+          <b-form-checkbox v-model="form.glutenFree">ללא גלוטן</b-form-checkbox>
+        </div>
       </b-form-group>
 
-      <b-form-group label="האם צמחוני?">
-        <b-form-checkbox v-model="form.vegetarian">כן</b-form-checkbox>
-      </b-form-group>
-
-      <b-form-group label="ללא גלוטן?">
-        <b-form-checkbox v-model="form.glutenFree">כן</b-form-checkbox>
-      </b-form-group>
 
       <b-form-group label="רשימת מרכיבים (extendedIngredients)">
         <b-form-textarea
@@ -58,20 +55,24 @@
         />
       </b-form-group>
 
-      <div class="text-end">
-        <b-button variant="secondary" class="me-2" @click="onUpdateShow(false)">
+      <div class="button-row">
+        <b-button variant="secondary" @click="onUpdateShow(false)">
           ביטול
         </b-button>
-        <b-button type="submit" variant="success">שמור מתכון</b-button>
+        <b-button type="submit" variant="success">
+          שמור מתכון
+        </b-button>
       </div>
+
     </b-form>
   </b-modal>
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { ref, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+
 
 export default {
   name: "CreateRecipeModal",
@@ -94,35 +95,43 @@ export default {
       servings: 1,
     });
 
+
+        const resetScroll = () => {
+      nextTick(() => {
+        const el = document.querySelector('.modal-body');
+        if (el) {
+          el.scrollTop = 0;
+        }
+      });
+    };
+
     const onUpdateShow = (val) => {
       emit("update:show", val);
+      if (!val) {
+        resetScroll();
+      }
     };
+
 
     const submitRecipe = async () => {
       try {
         const payload = {
-          ...form.value,
-          extendedIngredients: form.value.extendedIngredients
-            .split(",")
-            .map((line, index) => {
-              const parts = line.trim().split(" ");
-              const amount = parseFloat(parts[0]) || 1;
-              const unit = isNaN(parseFloat(parts[1])) ? parts[1] : '';
-              const name = parts.slice(unit ? 2 : 1).join(" ");
-
-              return {
-                id: index + 1,
-                amount,
-                unit,
-                name,
-                original: line.trim()
-              };
-            })
+          title: form.value.title || "",
+          readyInMinutes: form.value.readyInMinutes || 0,
+          image: form.value.image || "",
+          vegan: !!form.value.vegan,
+          vegetarian: !!form.value.vegetarian,
+          glutenFree: !!form.value.glutenFree,
+          extendedIngredients: form.value.extendedIngredients || "",
+          instructions: form.value.instructions || "",
+          servings: form.value.servings || 1
         };
+
         await axios.post("http://localhost:3000/user/recipes/", payload, {
           withCredentials: true,
         });
         emit("update:show", false);
+        resetScroll();
         alert("המתכון נשמר בהצלחה");
         router.push({ name: "myRecipes" });
       } catch (err) {
@@ -181,5 +190,13 @@ export default {
   border-radius: 0.75rem !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
 }
+
+.button-row {
+  display: flex;
+  justify-content: center; /* מרכז את הכפתורים */
+  gap: 1rem;               /* מרווח ביניהם */
+  margin-top: 1.5rem;      /* רווח מהשדות למעלה */
+}
+
 
 </style>

@@ -7,6 +7,7 @@
         :recipes="myRecipes"
         title="מתכונים שיצרתי"
         @update-favorite="handleFavoriteUpdate"
+        @delete-recipe="handleDeleteRecipe"
       />
     </div>
     <div v-else class="text-center text-muted mt-4">
@@ -31,23 +32,30 @@ export default {
         const res = await axios.get("http://localhost:3000/user/recipes", {
           withCredentials: true,
         });
-        myRecipes.value = res.data;
+        // מסננים רק מתכונים עם ID שמתחיל ב-U_
+        myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("U_"));
       } catch (err) {
         console.error("שגיאה בטעינת מתכונים שלי:", err);
       }
     };
 
-  //   const handleLikesUpdate = (recipeId) => {
-  //   const recipe = myRecipes.value.find(r => r.id === recipeId);
-  //   if (recipe) {
-  //     recipe.popularity = (recipe.popularity || 0) + 1;
-  //   }
-  // };
-
     const handleFavoriteUpdate = (recipeId, isNowFavorite) => {
-      const recipe = myRecipes.value.find(r => r.id === recipeId);
+      const recipe = myRecipes.value.find(r => r.recipeID === recipeId);
       if (recipe) {
         recipe.isFavoriteByUser = isNowFavorite;
+      }
+    };
+
+    const handleDeleteRecipe = async (recipeId) => {
+      if (confirm("האם למחוק את המתכון הזה?")) {
+        try {
+          await axios.delete(`http://localhost:3000/user/recipes/${recipeId.replace("U_", "")}`, {
+            withCredentials: true,
+          });
+          myRecipes.value = myRecipes.value.filter(r => r.recipeID !== recipeId);
+        } catch (err) {
+          console.error("שגיאה במחיקת מתכון:", err);
+        }
       }
     };
 
@@ -57,7 +65,8 @@ export default {
 
     return {
       myRecipes,
-      handleFavoriteUpdate
+      handleFavoriteUpdate,
+      handleDeleteRecipe
     };
   }
 };
