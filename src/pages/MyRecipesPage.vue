@@ -33,7 +33,7 @@ export default {
           withCredentials: true,
         });
         // מסננים רק מתכונים עם ID שמתחיל ב-U_
-        myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("1"));
+        myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("U_"));
       } catch (err) {
         console.error("שגיאה בטעינת מתכונים שלי:", err);
       }
