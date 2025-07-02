@@ -33,7 +33,7 @@
         <!-- הוראות -->
         <div class="col-md-6 instructions-box">
           <h4 class="section-title">📖 הוראות הכנה</h4>
-          <div v-html="recipe.instructions"></div>
+          <div v-html="formattedInstructions"></div>
         </div>
       </div>
     </div>
@@ -44,7 +44,6 @@
   </div>
 </template>
 
-
 <script>
 export default {
   data() {
@@ -52,6 +51,19 @@ export default {
       recipe: null,
     };
   },
+
+  computed: {
+    formattedInstructions() {
+      if (!this.recipe || !this.recipe.instructions) return '';
+      return this.recipe.instructions
+        .split('.')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => s + '.')
+        .join('<br>');
+    }
+  },
+
   async created() {
     try {
       let response = await this.axios.get(
@@ -76,6 +88,7 @@ export default {
         isFavoriteByUser,
         isWatched,
       } = response.data;
+      
 
       this.recipe = {
         title,
@@ -108,7 +121,7 @@ export default {
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  max-width: 1000px;
+  max-width: 900px;
   margin: auto;
 }
 
@@ -122,7 +135,7 @@ export default {
 .recipe-image {
   display: block;
   margin: 0 auto 1rem auto;
-  max-width: 100%;
+  max-width: 70%; 
   border-radius: 0.5rem;
 }
 
@@ -144,6 +157,20 @@ export default {
   margin-bottom: 0.75rem;
 }
 
+.ingredients-box li {
+  line-height: 1.8;
+  margin-bottom: 0.6em;
+}
+
+.instructions-box p {
+  line-height: 1.8;
+  margin-bottom: 0.8em;
+}
+
+.instructions-box {
+  line-height: 1.8;
+}
+
 .ingredients-box,
 .instructions-box {
   background-color: #f9f9f9;
@@ -160,5 +187,4 @@ export default {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 </style>

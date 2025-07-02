@@ -36,7 +36,9 @@
           </template>
 
           <template v-else>
-            <b-navbar-text class="text-light mx-2 font-weight-bold">{{ store.username }}</b-navbar-text>
+          <b-navbar-text class="user-greeting mx-2">
+            שלום {{ store.username }} ! &nbsp;
+          </b-navbar-text>
             <div
               class="position-relative"
               @click.stop="toggleDropdown"
@@ -44,21 +46,24 @@
               aria-label="אזור אישי"
             >
               אזור אישי ▼
-              <div
-                v-show="isShowDropdown"
-                class="custom-dropdown"
-                @click.stop
-              >
-                <router-link class="dropdown-link" :to="{ name: 'favorites' }">
+              <transition name="fade-slide">
+                <div
+                  v-show="isShowDropdown"
+                  class="custom-dropdown"
+                  @click.stop
+                >
+                <router-link class="dropdown-link" :to="{ name: 'favorites' }" @click="closeDropdown">
                   ❤️ המועדפים שלי
                 </router-link>
-                <router-link class="dropdown-link" :to="{ name: 'myRecipes' }">
+                <router-link class="dropdown-link" :to="{ name: 'myRecipes' }" @click="closeDropdown">
                   📝 המתכונים שלי
                 </router-link>
-                <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }">
+                <router-link class="dropdown-link" :to="{ name: 'familyRecipes' }" @click="closeDropdown">
                   👨‍👩‍👧‍👦 המשפחתיים שלי
                 </router-link>
-              </div>
+
+                </div>
+              </transition>
             </div>
 
             <b-nav-item @click="showCreateModal = true">
@@ -184,18 +189,19 @@ export default {
   margin-left: 0.3rem;
 }
 
-/* Dropdown Custom */
 .custom-dropdown {
   position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
+  top: calc(100% + 0.5rem);
+  background-color: #f0f8ff;
+  border: 1px solid #bcd;
+  border-radius: 0.8rem;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   z-index: 1000;
-  min-width: 150px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-align: center; /* מרכז הטקסט */
 }
+
 
 .dropdown-link {
   display: block;
@@ -209,9 +215,53 @@ export default {
   }
 }
 
+.custom-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 1.5rem;
+  border-width: 0 8px 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent #f0f8ff transparent;
+  filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.1));
+}
+
+
 @media (max-width: 992px) {
   .nav-link {
     margin: 0.5rem 0;
   }
 }
+body {
+  font-family: 'Heebo', sans-serif;
+  font-weight: 400;
+  line-height: 1.8;
+  color: #333;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+.user-greeting {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: 500;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+
 </style>

@@ -4,7 +4,13 @@
     @update:model-value="onUpdateShow"
     title="📝 יצירת מתכון חדש"
     hide-footer
+    size="md"
+    content-class="custom-modal-content"
+    body-class="custom-modal-body"
   >
+
+
+
     <b-form @submit.prevent="submitRecipe">
       <b-form-group label="שם המתכון">
         <b-form-input v-model="form.title" required />
@@ -33,7 +39,7 @@
       <b-form-group label="רשימת מרכיבים (extendedIngredients)">
         <b-form-textarea
           v-model="form.extendedIngredients"
-          placeholder="הפרד בין רכיבים עם פסיקים (,) לדוגמה: קמח, ביצים, סוכר"
+          placeholder="דוגמה: 2 כוסות סוכר, 3 ביצים, 200 גרם חמאה"
           rows="3"
           required
         />
@@ -77,15 +83,15 @@ export default {
     const router = useRouter();
 
     const form = ref({
-    title: "",
-    readyInMinutes: 1,
-    image: "",
-    vegan: "",
-    vegetarian: "",
-    glutenFree: "",
-    extendedIngredients: "",
-    instructions: "",
-    servings: 1,
+      title: "",
+      readyInMinutes: 1,
+      image: "",
+      vegan: "",
+      vegetarian: "",
+      glutenFree: "",
+      extendedIngredients: "",
+      instructions: "",
+      servings: 1,
     });
 
     const onUpdateShow = (val) => {
@@ -94,7 +100,6 @@ export default {
 
     const submitRecipe = async () => {
       try {
-        console.log(`User input: ${payload}`);
         const payload = {
           ...form.value,
           extendedIngredients: form.value.extendedIngredients
@@ -113,20 +118,15 @@ export default {
                 original: line.trim()
               };
             })
-          }
+        };
         await axios.post("http://localhost:3000/user/recipes/", payload, {
           withCredentials: true,
         });
-        console.log("Create recipes invoked successfully on Node.js");
         emit("update:show", false);
-        alert("המתכון נשמר בהצלחה", "", "success");
-
-        // redirect to MyRecipes...
+        alert("המתכון נשמר בהצלחה");
         router.push({ name: "myRecipes" });
       } catch (err) {
-        console.error("שגיאה ביצירת מתכון:", err);
         console.error("שגיאה ביצירת מתכון:", err?.response?.data || err.message || err);
-
       }
     };
 
@@ -154,8 +154,32 @@ export default {
 };
 </script>
 
-<style scoped>
-.me-2 {
-  margin-inline-end: 0.5rem;
+<style >
+/* הקטנת רוחב המודל */
+.modal-dialog {
+  max-width: 500px !important;
+  margin: 15vh auto !important;
 }
+
+/* גלילה פנימית */
+.modal-content .modal-body {
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+/* יישור ימין */
+.modal-content .modal-body {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* עיצוב מסגרת */
+.modal-content {
+  border: 1px solid #ddd !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+}
+
 </style>
