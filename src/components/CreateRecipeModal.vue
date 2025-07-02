@@ -172,7 +172,7 @@ export default {
 
 /* גלילה פנימית */
 .modal-content .modal-body {
-  max-height: 60vh !important;
+  max-height: 65vh !important;
   overflow-y: auto !important;
   padding-left: 1rem !important;
   padding-right: 1rem !important;
@@ -186,9 +186,9 @@ export default {
 
 /* עיצוב מסגרת */
 .modal-content {
-  border: 1px solid #ddd !important;
+  border: 1px solid #9a9595 !important;
   border-radius: 0.75rem !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
 }
 
 .button-row {
