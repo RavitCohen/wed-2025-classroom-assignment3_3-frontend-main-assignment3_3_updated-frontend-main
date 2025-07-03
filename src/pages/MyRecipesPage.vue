@@ -5,6 +5,7 @@
     <div v-if="myRecipes.length">
       <RecipePreviewList
         :recipes="myRecipes"
+        :isShowDelete="true"
         title="מתכונים שיצרתי"
         @update-favorite="handleFavoriteUpdate"
         @delete-recipe="handleDeleteRecipe"
@@ -27,13 +28,23 @@ export default {
   setup() {
     const myRecipes = ref([]);
 
-    const loadMyRecipes = async () => {
+    // const loadMyRecipes = async () => {
+    //   try {
+    //     const res = await axios.get("http://localhost:3000/user/recipes", {
+    //       withCredentials: true,
+    //     });
+    //     // מסננים רק מתכונים עם ID שמתחיל ב-U_
+    //     myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("U_"));
+    //   } catch (err) {
+    //     console.error("שגיאה בטעינת מתכונים שלי:", err);
+    //   }
+    // };
+   const loadMyRecipes = async () => {
       try {
         const res = await axios.get("http://localhost:3000/user/recipes", {
           withCredentials: true,
         });
-        // מסננים רק מתכונים עם ID שמתחיל ב-U_
-        myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("U_"));
+        myRecipes.value = res.data;
       } catch (err) {
         console.error("שגיאה בטעינת מתכונים שלי:", err);
       }
@@ -47,16 +58,8 @@ export default {
     };
 
     const handleDeleteRecipe = async (recipeId) => {
-      if (confirm("האם למחוק את המתכון הזה?")) {
-        try {
-          await axios.delete(`http://localhost:3000/user/recipes/${recipeId.replace("U_", "")}`, {
-            withCredentials: true,
-          });
-          myRecipes.value = myRecipes.value.filter(r => r.recipeID !== recipeId);
-        } catch (err) {
-          console.error("שגיאה במחיקת מתכון:", err);
-        }
-      }
+      myRecipes.value = myRecipes.value.filter(r => r.recipeID !== recipeId);
+      await loadMyRecipes();
     };
 
     onMounted(() => {

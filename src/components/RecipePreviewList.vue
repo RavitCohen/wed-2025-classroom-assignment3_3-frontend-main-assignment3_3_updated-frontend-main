@@ -5,7 +5,9 @@
         v-for="r in recipes"
         :key="r.id"
         :recipe="r"
+        :isShowDelete="isShowDelete" 
         @update-favorite="(id, isFav) => $emit('update-favorite', id, isFav)"
+        @delete-recipe="(id) => $emit('delete-recipe', id)"
         @refresh="$emit('refresh')"
       />
     </div>
@@ -18,7 +20,8 @@ export default {
   name: "RecipePreviewList",
   components: { RecipePreview },
   props: {
-    recipes: { type: Array, required: true }
+    recipes: { type: Array, required: true },
+    isShowDelete: { type: Boolean, default: false }
   }
 };
 </script>

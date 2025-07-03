@@ -37,6 +37,15 @@
           >
             ❌ הסר ממועדפים
           </b-button>
+
+          <b-button
+            v-if="isShowDelete"
+            variant="outline-secondary"
+            size="sm"
+            @click.stop="removeFromMyRecipe"
+          >          
+          🗑️ הסר מתכון
+          </b-button>
         </div>
       </div>
     </div>
@@ -50,13 +59,15 @@ import { computed, ref } from 'vue';
 export default {
   name: "RecipePreview",
   props: {
-    recipe: { type: Object, required: true }
+    recipe: { type: Object, required: true },
+    isShowDelete: { type: Boolean, default: false }
   },
   setup(props) {
     const isLoggedIn = computed(() => !!store.username.value);
     // ניהול מצב פנימי של מועדף
     const isFavorite = ref(props.recipe.isFavoriteByUser || false);
-    return { isLoggedIn, isFavorite };
+     const showDeleteBtn = computed(() => props.isShowDelete);
+    return { isLoggedIn, isFavorite,  showDeleteBtn};
   },
   methods: {
     async handleClick() {
@@ -95,6 +106,20 @@ export default {
         this.$emit("refresh");
       } catch (err) {
         console.error("שגיאה בהסרת מועדף:", err);
+      }
+    },
+    async removeFromMyRecipe(){
+        if (confirm("האם למחוק את המתכון הזה?")) {
+        try {
+          await this.axios.delete(`${this.$root.store.server_domain}/user/recipes/${this.recipe.id.replace("U_", "")}`, 
+          {withCredentials: true,}
+        );
+
+          this.$emit("delete-recipe", this.recipe.id);
+          this.$emit("refresh");
+        } catch (err) {
+          console.error("שגיאה במחיקת מתכון:", err);
+        }
       }
     }
   }
