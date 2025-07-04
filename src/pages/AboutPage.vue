@@ -14,7 +14,7 @@
           <a href="https://wed-2023.github.io/313188799/" target="_blank">תרגיל 1- גיל שלישי (רוית)</a>
         </li>
         <li class="list-group-item">
-          <a href="#" target="_blank">תרגיל 1- גיל שלישי (נטלי)</a>
+          <a href="https://wed-2023.github.io/322685314/" target="_blank">תרגיל 1- גיל שלישי (נטלי)</a>
         </li>
         <li class="list-group-item">
           <a href=" https://wed-2023.github.io/assignment2-322685314_313188799_assignment2/" target="_blank">תרגיל 2 - בניית משחק</a>

@@ -25,17 +25,22 @@
               <label>מספר תוצאות</label>
             </div>
           </b-col>
-          <b-col md="3" class="text-end">
+          <b-col md="3">
             <b-button
               variant="outline-secondary"
               size="sm"
               @click="showFilters = !showFilters"
-              class="filter-toggle-btn d-inline-flex align-items-center"
+              class="w-100"
+              style="height:38px;"
             >
               <b-icon icon="funnel" class="me-1"></b-icon>
               {{ showFilters ? 'הסתר מתקדמים' : 'מסננים מתקדמים' }}
             </b-button>
           </b-col>
+
+
+
+
         </b-row>
 
         <!-- שורת מסננים -->

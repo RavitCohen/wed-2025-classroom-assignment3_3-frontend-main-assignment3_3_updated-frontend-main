@@ -33,10 +33,10 @@
       </b-form-group>
 
 
-      <b-form-group label="רשימת מרכיבים (extendedIngredients)">
+      <b-form-group label="רשימת מצרכים">
         <b-form-textarea
           v-model="form.extendedIngredients"
-          placeholder="דוגמה: 2 כוסות סוכר, 3 ביצים, 200 גרם חמאה"
+          :placeholder="'יש להפריד באמצעות פסיק (,)\nדוגמה: 2 כוסות סוכר, 3 ביצים, 200 גרם חמאה'"
           rows="3"
           required
         />
@@ -55,7 +55,23 @@
         />
       </b-form-group>
 
-      <div class="button-row">
+      <div
+        v-if="state.successMessage"
+        class="alert alert-success mt-3 text-center"
+        role="alert"
+      >
+        {{ state.successMessage }}
+      </div>
+
+      <div
+        v-if="state.submitError"
+        class="alert alert-danger mt-3 text-center"
+        role="alert"
+      >
+        {{ state.submitError }}
+      </div>
+
+            <div class="button-row">
         <b-button variant="secondary" @click="onUpdateShow(false)">
           ביטול
         </b-button>
@@ -64,15 +80,16 @@
         </b-button>
       </div>
 
+
     </b-form>
+
   </b-modal>
 </template>
 
 <script>
-import { ref, watch, nextTick } from "vue";
+import { reactive, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-
 
 export default {
   name: "CreateRecipeModal",
@@ -83,22 +100,26 @@ export default {
   setup(props, { emit }) {
     const router = useRouter();
 
-    const form = ref({
+    const state = reactive({
+      successMessage: "",
+      submitError: ""
+    });
+
+    const form = reactive({
       title: "",
       readyInMinutes: 1,
       image: "",
-      vegan: "",
-      vegetarian: "",
-      glutenFree: "",
+      vegan: false,
+      vegetarian: false,
+      glutenFree: false,
       extendedIngredients: "",
       instructions: "",
       servings: 1,
     });
 
-
-        const resetScroll = () => {
+    const resetScroll = () => {
       nextTick(() => {
-        const el = document.querySelector('.modal-body');
+        const el = document.querySelector(".modal-body");
         if (el) {
           el.scrollTop = 0;
         }
@@ -109,33 +130,45 @@ export default {
       emit("update:show", val);
       if (!val) {
         resetScroll();
+        state.successMessage = "";
+        state.submitError = "";
       }
     };
 
-
     const submitRecipe = async () => {
       try {
+        state.successMessage = "";
+        state.submitError = "";
+
         const payload = {
-          title: form.value.title || "",
-          readyInMinutes: form.value.readyInMinutes || 0,
-          image: form.value.image || "",
-          vegan: !!form.value.vegan,
-          vegetarian: !!form.value.vegetarian,
-          glutenFree: !!form.value.glutenFree,
-          extendedIngredients: form.value.extendedIngredients || "",
-          instructions: form.value.instructions || "",
-          servings: form.value.servings || 1
+          title: form.title || "",
+          readyInMinutes: form.readyInMinutes || 0,
+          image: form.image || "",
+          vegan: !!form.vegan,
+          vegetarian: !!form.vegetarian,
+          glutenFree: !!form.glutenFree,
+          extendedIngredients: form.extendedIngredients || "",
+          instructions: form.instructions || "",
+          servings: form.servings || 1
         };
 
         await axios.post("http://localhost:3000/user/recipes/", payload, {
           withCredentials: true,
         });
-        emit("update:show", false);
-        resetScroll();
-        alert("המתכון נשמר בהצלחה");
-        router.push({ name: "myRecipes" });
+
+        state.successMessage = "🎉 המתכון נשמר בהצלחה!";
+        state.submitError = "";
+
+        setTimeout(() => {
+          emit("update:show", false);
+          resetScroll();
+          router.push({ name: "myRecipes" });
+        }, 3000);
+
       } catch (err) {
         console.error("שגיאה ביצירת מתכון:", err?.response?.data || err.message || err);
+        state.submitError = "אירעה שגיאה בשמירת המתכון.";
+        state.successMessage = "";
       }
     };
 
@@ -143,24 +176,28 @@ export default {
       () => props.show,
       (newVal) => {
         if (!newVal) {
-          form.value = {
+          // איפוס כל הערכים
+          Object.assign(form, {
             title: "",
             readyInMinutes: 1,
             image: "",
-            vegan: "",
-            vegetarian: "",
-            glutenFree: "",
+            vegan: false,
+            vegetarian: false,
+            glutenFree: false,
             extendedIngredients: "",
             instructions: "",
             servings: 1,
-          };
+          });
+          state.successMessage = "";
+          state.submitError = "";
         }
       }
     );
 
-    return { form, submitRecipe, onUpdateShow };
+    return { form, submitRecipe, onUpdateShow, state };
   },
 };
+
 </script>
 
 <style >

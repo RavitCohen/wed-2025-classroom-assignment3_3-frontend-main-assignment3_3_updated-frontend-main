@@ -56,12 +56,13 @@ export default {
     formattedInstructions() {
       if (!this.recipe || !this.recipe.instructions) return '';
       return this.recipe.instructions
-        .split('.')
+        .split(/[.\n]/)             
         .map(s => s.trim())
         .filter(s => s.length > 0)
-        .map(s => s + '.')
+        .map(s => s + '.')             
         .join('<br>');
     }
+
   },
 
   async created() {
@@ -97,10 +98,13 @@ export default {
         vegan,
         vegetarian,
         glutenFree,
-        extendedIngredients:
-          typeof extendedIngredients === "string"
-            ? JSON.parse(extendedIngredients)
-            : extendedIngredients,
+        extendedIngredients: Array.isArray(extendedIngredients)
+          ? extendedIngredients.map(s =>
+              typeof s === "string"
+                ? { original: s.replace(/^"+|"+$/g, "").trim() }
+                : s
+            )
+          : [],
         instructions,
         servings,
         isFavoriteByUser,
@@ -167,9 +171,6 @@ export default {
   margin-bottom: 0.8em;
 }
 
-.instructions-box {
-  line-height: 1.8;
-}
 
 .ingredients-box,
 .instructions-box {
