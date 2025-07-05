@@ -23,7 +23,9 @@
           <p class="info-text">
             ל{{ recipe.servings }} מנות | זמן הכנה: {{ recipe.readyInMinutes }} דקות
           </p>
-          <ul>
+          <ul             
+            :dir="ingredientsDirection.dir"
+            :style="{ textAlign: ingredientsDirection.textAlign }">
             <li v-for="(r, index) in recipe.extendedIngredients" :key="index">
               {{ r.original }}
             </li>
@@ -33,7 +35,12 @@
         <!-- הוראות -->
         <div class="col-md-6 instructions-box">
           <h4 class="section-title">📖 הוראות הכנה</h4>
-          <div v-html="formattedInstructions"></div>
+          <!-- <div v-html="formattedInstructions"></div> -->
+           <div
+            v-html="formattedInstructions.html"
+            :dir="formattedInstructions.dir"
+            :style="{ textAlign: formattedInstructions.textAlign }"
+          />
         </div>
       </div>
     </div>
@@ -53,17 +60,58 @@ export default {
   },
 
   computed: {
-    formattedInstructions() {
-      if (!this.recipe || !this.recipe.instructions) return '';
-      return this.recipe.instructions
-        .split(/[.\n]/)             
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-        .map(s => s + '.')             
-        .join('<br>');
-    }
+    // formattedInstructions() {
+    //   if (!this.recipe || !this.recipe.instructions) return '';
+    //   return this.recipe.instructions
+    //     .split(/[.\n]/)             
+    //     .map(s => s.trim())
+    //     .filter(s => s.length > 0)
+    //     .map(s => s + '.')             
+    //     .join('<br>');
+    // }
 
-  },
+    formattedInstructions() {
+          if (!this.recipe || !this.recipe.instructions) {
+            return { html: '', dir: 'rtl', textAlign: 'right' };
+          }
+
+          const raw = this.recipe.instructions.trim();
+
+          // match direction to lang
+          const isHebrew = /[\u0590-\u05FF]/.test(raw);
+          const dir = isHebrew ? 'rtl' : 'ltr';
+          const textAlign = isHebrew ? 'right' : 'left';
+
+          // already in html format (like in spooncular)
+          if (/<\/?(ol|ul|li|p|br)>/i.test(raw)) {
+            return { html: raw, dir, textAlign };
+          }
+
+          // process text if needed
+          const steps = raw
+            .split('\n')
+            .map(s => s.trim())
+            .filter(s => s.length > 0)
+            .map(s => s.replace(/^\d+\s*[.)]?\s*/, ''));
+
+          const listItems = steps.map(s => `<li>${s}</li>`).join('');
+          const html = `<ol>${listItems}</ol>`;
+
+          return { html, dir, textAlign };
+        },
+
+    ingredientsDirection() {
+      const ingredientsText = this.recipe.extendedIngredients
+        .map(ing => typeof ing.original === 'string' ? ing.original : '')
+        .join(' ');
+
+      const isHebrew = /[\u0590-\u05FF]/.test(ingredientsText);
+      return {
+        dir: isHebrew ? 'rtl' : 'ltr',
+        textAlign: isHebrew ? 'right' : 'left'
+      };
+  }
+},
 
   async created() {
     try {

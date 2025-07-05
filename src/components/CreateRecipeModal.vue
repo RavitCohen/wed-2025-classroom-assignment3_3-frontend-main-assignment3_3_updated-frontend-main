@@ -21,7 +21,7 @@
       </b-form-group>
 
       <b-form-group label="תמונה (קישור URL)">
-        <b-form-input v-model="form.image" type="url" />
+        <b-form-input v-model="form.image" type="url" required/>
       </b-form-group>
 
       <b-form-group label="מאפייני תזונה">
