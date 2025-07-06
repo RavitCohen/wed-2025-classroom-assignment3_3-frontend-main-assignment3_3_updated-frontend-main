@@ -246,7 +246,7 @@ body {
 }
 
 body {
-  background: linear-gradient(rgba(238, 248, 255, 0.8), rgba(175, 198, 236, 0.8)),
+  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
              url('~@/assets/background.jpg') no-repeat center center fixed;
   background-size: cover;
 }

@@ -131,11 +131,10 @@ export default {
           password: state.password,
         });
 
-        store.login(state.username);
-
         state.loginSuccess = true;
 
         setTimeout(() => {
+          store.login(state.username);
           router.push('/');
         }, 1500);
       } catch (err) {
