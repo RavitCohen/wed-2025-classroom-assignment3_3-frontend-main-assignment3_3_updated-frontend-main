@@ -156,7 +156,7 @@ export default {
           withCredentials: true,
         });
 
-        state.successMessage = "🎉 המתכון נשמר בהצלחה!";
+        state.successMessage = "המתכון נשמר בהצלחה!";
         state.submitError = "";
 
         setTimeout(() => {
@@ -201,13 +201,19 @@ export default {
 </script>
 
 <style >
-/* הקטנת רוחב המודל */
 .modal-dialog {
   max-width: 500px !important;
   margin: 15vh auto !important;
 }
 
-/* גלילה פנימית */
+.modal-header {
+  background: linear-gradient(90deg, #0d6efd, #6610f2);
+  color: white;
+  font-weight: 600;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+
 .modal-content .modal-body {
   max-height: 65vh !important;
   overflow-y: auto !important;
@@ -215,24 +221,22 @@ export default {
   padding-right: 1rem !important;
 }
 
-/* יישור ימין */
 .modal-content .modal-body {
   direction: rtl !important;
   text-align: right !important;
 }
 
-/* עיצוב מסגרת */
 .modal-content {
   border: 1px solid #9a9595 !important;
-  border-radius: 0.75rem !important;
+  border-radius: 0.7rgb(71, 42, 204)mportant;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
 }
 
 .button-row {
   display: flex;
-  justify-content: center; /* מרכז את הכפתורים */
-  gap: 1rem;               /* מרווח ביניהם */
-  margin-top: 1.5rem;      /* רווח מהשדות למעלה */
+  justify-content: center; 
+  gap: 1rem;              
+  margin-top: 1.5rem;    
 }
 
 

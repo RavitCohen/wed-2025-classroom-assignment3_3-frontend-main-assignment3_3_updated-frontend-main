@@ -20,7 +20,7 @@
           <a href=" https://wed-2023.github.io/assignment2-322685314_313188799_assignment2/" target="_blank">תרגיל 2 - בניית משחק</a>
         </li>
         <li class="list-group-item">
-          <a href="#" target="_blank">תרגיל 3.1 - API Documentation</a>
+          <a href="/openapi-finalAPI.yaml" target="_blank">תרגיל 3.1 - API Documentation</a>
         </li>
         <li class="list-group-item">
           <a href="https://github.com/WED-2023/assignment3-2-322685314_313188799_assignment2" target="_blank">תרגיל 3.2 - Backend</a>

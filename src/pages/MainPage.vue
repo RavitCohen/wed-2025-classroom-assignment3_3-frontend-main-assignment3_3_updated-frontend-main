@@ -2,22 +2,14 @@
   <div class="container py-4">
     <h1 class="title text-center mb-4">עמוד מתכונים ראשי</h1>
 
-    <!-- שורת כותרות -->
-    <div class="titles-row">
-      <div class="title-col">המתכונים שצפית לאחרונה</div>
-      <div class="title-col">מתכונים מומלצים</div>
-    </div>
-
     <div class="recipes-wrapper">
       <!-- עמודה ימין -->
       <div class="recipes-section">
+        <h3 class="section-title">המתכונים שצפית לאחרונה</h3>
         <div v-if="!isLoggedIn">
-          <h3 class="mb-3 text-center">👵 ברוך הבא לאתר מתכוני סבתא</h3>
+          <h4 class="mb-3 text-center">👵 ברוך הבא לאתר מתכוני סבתא</h4>
           <p class="text-center">כדי לצפות במתכונים שצפית לאחרונה, התחבר או הירשם:</p>
-
-          <!-- כאן הטופס המלא -->
           <LoginPage />
-
         </div>
         <div v-else class="recipes-list-vertical">
           <RecipePreview
@@ -30,6 +22,7 @@
 
       <!-- עמודה שמאל -->
       <div class="recipes-section">
+        <h3 class="section-title">מתכונים מומלצים</h3>
         <div class="recipes-list-vertical">
           <RecipePreview
             v-for="r in randomRecipes"
@@ -44,9 +37,6 @@
     </div>
   </div>
 </template>
-
-
-
 
 <script>
 import { ref, onMounted, computed } from 'vue';
@@ -100,24 +90,7 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
-.titles-row {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-}
-
-.title-col {
-  flex: 0 0 48%;
-  text-align: center;
-  font-weight: 600;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 0.3rem;
-}
-
 .recipes-wrapper {
   display: flex;
   gap: 1rem;
@@ -136,6 +109,15 @@ export default {
   flex-direction: column;
 }
 
+.section-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.3rem;
+}
+
 .recipes-list-vertical {
   display: flex;
   flex-direction: column;
@@ -143,13 +125,6 @@ export default {
 }
 
 @media (max-width: 992px) {
-  .titles-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .title-col {
-    flex: 1 1 100%;
-  }
   .recipes-wrapper {
     flex-direction: column;
   }
@@ -157,7 +132,5 @@ export default {
     flex: 1 1 100%;
   }
 }
-
-
 </style>
-
+ 

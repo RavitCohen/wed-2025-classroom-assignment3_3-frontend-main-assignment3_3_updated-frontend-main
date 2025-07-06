@@ -6,10 +6,11 @@
         🍲 מתכוני סבתא
       </b-navbar-brand>
 
-      <b-navbar-toggle target="nav-collapse" />
+        <b-navbar-toggle target="nav-collapse" />
+        
+        <b-collapse id="nav-collapse" is-nav class="w-100">
 
-      <b-collapse id="nav-collapse" is-nav class="w-100">
-        <b-navbar-nav class="align-items-center w-100">
+          <b-navbar-nav class="align-items-center w-100">
           <!-- קישורים ראשיים -->
           <router-link class="nav-link" :to="{ name: 'main' }">
             <i class="bi bi-house"></i> דף הבית
@@ -128,7 +129,7 @@ export default {
       isLoggedIn,
       isShowDropdown,
       toggleDropdown,
-      closeDropdown
+      closeDropdown,
     };
   }
 };
@@ -140,7 +141,6 @@ export default {
 #app {
   font-family: 'Heebo', sans-serif;
   min-height: 100vh;
-  background: #f6f8fa;
   color: #2c3e50;
 }
 
@@ -228,15 +228,27 @@ export default {
 
 
 @media (max-width: 992px) {
-  .nav-link {
-    margin: 0.5rem 0;
+  .main-navbar .nav-link {
+    display: block;
+    text-align: right;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    border-bottom: 1px solid rgba(121, 93, 207, 0.15);
   }
+
 }
+
 body {
   font-family: 'Heebo', sans-serif;
   font-weight: 400;
   line-height: 1.8;
   color: #333;
+}
+
+body {
+  background: linear-gradient(rgba(238, 248, 255, 0.8), rgba(175, 198, 236, 0.8)),
+             url('~@/assets/background.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
 
 .fade-slide-enter-active,
@@ -262,6 +274,8 @@ body {
   display: inline-block;
   box-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
+
+
 
 
 </style>
