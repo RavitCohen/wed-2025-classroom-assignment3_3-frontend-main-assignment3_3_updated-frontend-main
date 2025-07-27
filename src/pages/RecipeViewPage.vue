@@ -60,45 +60,49 @@ export default {
   },
 
   computed: {
-    // formattedInstructions() {
-    //   if (!this.recipe || !this.recipe.instructions) return '';
-    //   return this.recipe.instructions
-    //     .split(/[.\n]/)             
-    //     .map(s => s.trim())
-    //     .filter(s => s.length > 0)
-    //     .map(s => s + '.')             
-    //     .join('<br>');
-    // }
-
     formattedInstructions() {
-          if (!this.recipe || !this.recipe.instructions) {
-            return { html: '', dir: 'rtl', textAlign: 'right' };
-          }
+      if (!this.recipe || !this.recipe.instructions) {
+        return { html: '', dir: 'rtl', textAlign: 'right' };
+      }
 
-          const raw = this.recipe.instructions.trim();
+      const raw = this.recipe.instructions.trim();
+      console.log(raw);
+      const isHebrew = /[\u0590-\u05FF]/.test(raw);
+      const dir = isHebrew ? 'rtl' : 'ltr';
+      const textAlign = isHebrew ? 'right' : 'left';
 
-          // match direction to lang
-          const isHebrew = /[\u0590-\u05FF]/.test(raw);
-          const dir = isHebrew ? 'rtl' : 'ltr';
-          const textAlign = isHebrew ? 'right' : 'left';
+      // HTML
+      if (/<\/?(ol|ul|li)>/i.test(raw)) {
+        const hasNumberedList = /<li>\s*\d+[.)]?\s*/i.test(raw) || /<ol>/i.test(raw);
 
-          // already in html format (like in spooncular)
-          if (/<\/?(ol|ul|li|p|br)>/i.test(raw)) {
-            return { html: raw, dir, textAlign };
-          }
+        // ordered
+        if (hasNumberedList) {
+          return { html: raw, dir, textAlign };
+        }
 
-          // process text if needed
-          const steps = raw
-            .split('\n')
-            .map(s => s.trim())
-            .filter(s => s.length > 0)
-            .map(s => s.replace(/^\d+\s*[.)]?\s*/, ''));
+        // not ordered
+        const cleanText = raw.replace(/<\/?[^>]+>/g, '');
+        const steps = this.smartSplit(cleanText);
+        const html = `<ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+        return { html, dir, textAlign };
+      }
 
-          const listItems = steps.map(s => `<li>${s}</li>`).join('');
-          const html = `<ol>${listItems}</ol>`;
+      // regular text
+      const lines = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      const isNumbered = lines.every(line => /^\d+[.)]\s*/.test(line));
 
-          return { html, dir, textAlign };
-        },
+      if (isNumbered) {
+        const steps = lines.map(s => s.replace(/^\d+[.)]\s*/, ''));
+        const listItems = steps.map(s => `<li>${s}</li>`).join('');
+        const html = `<ol>${listItems}</ol>`;
+        return { html, dir, textAlign };
+      } else {
+        const sentences = raw.replace(/<\/?[^>]+>/g, '');
+        const steps = this.smartSplit(sentences);
+        const html = `<ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+        return { html, dir, textAlign };
+      }
+    },
 
     ingredientsDirection() {
       const ingredientsText = this.recipe.extendedIngredients
@@ -113,6 +117,20 @@ export default {
   }
 },
 
+  methods: {
+      smartSplit(text) {
+      if (text.includes('.')) {
+        return text
+          .split(/(?<=[.?!])\s+/)
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      } else {
+        return text
+          .split(/\n+/)
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      }
+    }}, 
   async created() {
     try {
       let response = await this.axios.get(
