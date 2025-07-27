@@ -11,25 +11,15 @@
           <p class="text-center">כדי לצפות במתכונים שצפית לאחרונה, התחבר או הירשם:</p>
           <LoginPage />
         </div>
-        <div v-else class="recipes-list-vertical">
-          <RecipePreview
-            v-for="r in lastViewedRecipes"
-            :key="r.id"
-            :recipe="r"
-          />
+        <div v-else>
+          <RecipePreviewList :recipes="lastViewedRecipes" />
         </div>
       </div>
 
       <!-- עמודה שמאל -->
       <div class="recipes-section">
         <h3 class="section-title">מתכונים מומלצים</h3>
-        <div class="recipes-list-vertical">
-          <RecipePreview
-            v-for="r in randomRecipes"
-            :key="r.id"
-            :recipe="r"
-          />
-        </div>
+        <RecipePreviewList :recipes="randomRecipes" />
         <div class="text-center mt-3">
           <b-button variant="info" @click="loadMoreRandom">טען עוד מתכונים</b-button>
         </div>
@@ -41,13 +31,13 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import LoginPage from "./LoginPage.vue";
-import RecipePreview from "../components/RecipePreview.vue";
+import RecipePreviewList from "../components/RecipePreviewList.vue";
 import axios from 'axios';
 import store from "@/store";
 
 export default {
   components: {
-    RecipePreview,
+    RecipePreviewList,
     LoginPage
   },
   setup() {
@@ -60,7 +50,6 @@ export default {
         const res = await axios.get('http://localhost:3000/recipes', {
           withCredentials: true,
         });
-        console.log("Random recipes:", res.data);
         randomRecipes.value = res.data;
       } catch (err) {
         console.error('שגיאה בטעינת מתכונים רנדומליים:', err);
@@ -118,12 +107,6 @@ export default {
   padding-bottom: 0.3rem;
 }
 
-.recipes-list-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 @media (max-width: 992px) {
   .recipes-wrapper {
     flex-direction: column;
@@ -133,4 +116,3 @@ export default {
   }
 }
 </style>
- 
