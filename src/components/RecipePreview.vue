@@ -64,7 +64,6 @@ export default {
   },
   setup(props) {
     const isLoggedIn = computed(() => !!store.username.value);
-    // ניהול מצב פנימי של מועדף
     const isFavorite = ref(props.recipe.isFavoriteByUser || false);
      const showDeleteBtn = computed(() => props.isShowDelete);
     return { isLoggedIn, isFavorite,  showDeleteBtn};
@@ -108,18 +107,16 @@ export default {
         console.error("שגיאה בהסרת מועדף:", err);
       }
     },
-    async removeFromMyRecipe(){
-        if (confirm("האם למחוק את המתכון הזה?")) {
-        try {
-          await this.axios.delete(`${this.$root.store.server_domain}/user/recipes/${this.recipe.id.replace("U_", "")}`, 
-          {withCredentials: true,}
+    async removeFromMyRecipe() {
+      try {
+        await this.axios.delete(
+          `${this.$root.store.server_domain}/user/recipes/${String(this.recipe.id).replace("U_", "")}`,
+          { withCredentials: true }
         );
-
-          this.$emit("delete-recipe", this.recipe.id);
-          this.$emit("refresh");
-        } catch (err) {
-          console.error("שגיאה במחיקת מתכון:", err);
-        }
+        this.$emit("delete-recipe", this.recipe.id);
+        this.$emit("refresh");
+      } catch (err) {
+        console.error("שגיאה במחיקת מתכון:", err);
       }
     }
   }

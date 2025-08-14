@@ -181,7 +181,7 @@ export default {
         setTimeout(() => {
           emit("update:show", false);
           router.push({ name: "myRecipes" });
-        }, 3000);
+        }, 1500);
       } catch (err) {
         console.error("שגיאה ביצירת מתכון:", err?.response?.data || err.message || err);
         state.submitError = "אירעה שגיאה בשמירת המתכון.";
