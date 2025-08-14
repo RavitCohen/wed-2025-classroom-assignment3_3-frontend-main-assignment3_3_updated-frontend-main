@@ -1,40 +1,42 @@
 <template>
-  <div class="container py-4">
+  <div class="container py-4" dir="rtl">
     <h2 class="text-center mb-4">👨‍👩‍👧‍👦 המתכונים המשפחתיים שלי</h2>
 
     <div v-if="familyRecipes.length">
-    <div v-for="recipe in familyRecipes" :key="recipe.id" class="recipe-card mb-5">
-          <div class="recipe-content">
-              <div class="image-carousel">
-              <img
-                v-for="(imgSrc, index) in recipe.image"
-                :key="index"
-                :src="`/${imgSrc}`"
-                class="recipe-image"
-                alt="תמונה של מתכון"
-              />
-            </div>
-              <div class="recipe-details">
-                <h5 class="card-title">{{ recipe.title }}</h5>
-                <p style="font-size: 1.2rem;"><strong>⏱ זמן הכנה:</strong> {{ recipe.readyInMinutes }} דקות</p>
-                <p style="font-size: 1.5rem;"><strong>🧾 רכיבים:</strong></p>
-                <ul>
-                  <li v-for="(ingredient, index) in parseIngredients(recipe.extendedIngredients)" :key="index">
-                    {{ ingredient }}
-                  </li>
-                </ul>
-                <p class="instructions" style="font-size: 1.5rem;"><strong>📋 הוראות הכנה:</strong></p>
-                <ol>
-                  <li v-for="(step, idx) in parseInstructions(recipe.instructions)" :key="idx">
-                    {{ step }}
-                  </li>
-                </ol>
-                <p class="author"><strong>👩‍🍳 השף במשפחה שמתמחה במתכון:</strong> {{ recipe.recipeMaster }}</p>
-                <p class="season"><strong>🎉 מתי בשנה אוכלים אותו?</strong> {{ recipe.timeInYear }}</p>
-              </div>
-            </div>
+      <div v-for="recipe in familyRecipes" :key="recipe.id" class="recipe-card mb-5">
+        <div class="recipe-content">
+          <div class="image-carousel">
+            <img
+              v-for="(imgSrc, index) in recipe.images"
+              :key="index"
+              :src="resolveImage(imgSrc)"
+              class="recipe-image"
+              :alt="`תמונה ${index + 1} למתכון ${recipe.title}`"
+              @error="onImageError($event)"
+            />
+          </div>
+
+          <div class="recipe-details">
+            <h5 class="card-title">{{ recipe.title }}</h5>
+            <p style="font-size: 1.2rem;"><strong>⏱ זמן הכנה:</strong> {{ recipe.readyInMinutes }} דקות</p>
+            <p style="font-size: 1.5rem;"><strong>🧾 רכיבים:</strong></p>
+            <ul>
+              <li v-for="(ingredient, index) in parseIngredients(recipe.extendedIngredients)" :key="index">
+                {{ ingredient }}
+              </li>
+            </ul>
+            <p class="instructions" style="font-size: 1.5rem;"><strong>📋 הוראות הכנה:</strong></p>
+            <ol>
+              <li v-for="(step, idx) in parseInstructions(recipe.instructions)" :key="idx">
+                {{ step }}
+              </li>
+            </ol>
+            <p class="author"><strong>👩‍🍳 השף במשפחה שמתמחה במתכון:</strong> {{ recipe.recipeMaster }}</p>
+            <p class="season"><strong>🎉 מתי בשנה אוכלים אותו?</strong> {{ recipe.timeInYear }}</p>
+          </div>
         </div>
       </div>
+    </div>
 
     <div v-else class="text-center text-muted mt-4">
       לא נמצאו מתכונים משפחתיים. כדאי להוסיף לפחות שלושה מתכונים הקשורים לבני משפחתך 💖
@@ -51,16 +53,53 @@ export default {
   setup() {
     const familyRecipes = ref([]);
 
+    const normalizeImages = (imageField) => {
+      if (!imageField) return [];
+      // אם מה־DB מגיעה מחרוזת JSON כמו ["familyIMG/a.jpg", ...]
+      if (typeof imageField === "string") {
+        const s = imageField.trim();
+        if (s.startsWith("[") || s.startsWith("{")) {
+          try {
+            const parsed = JSON.parse(s);
+            if (Array.isArray(parsed)) return parsed.filter(Boolean);
+            if (parsed?.url || parsed?.src) return [parsed.url || parsed.src];
+          } catch {
+            // אם לא JSON תקין – נתייחס כמסלול יחיד
+            return [s];
+          }
+        }
+        return [s];
+      }
+      if (Array.isArray(imageField)) return imageField.filter(Boolean);
+      if (typeof imageField === "object" && (imageField.url || imageField.src))
+        return [imageField.url || imageField.src];
+      return [];
+    };
+
+    const resolveImage = (src) => {
+      if (!src) return "/placeholder-recipe.jpg";
+      const isAbsolute = /^https?:\/\//i.test(src);
+      const clean = String(src).replace(/^\/+/, ""); // הסרת לוכסנים מיותרים בתחילת הנתיב
+      return isAbsolute ? src : `/${clean}`; // קבצים תחת public זמינים משורש האתר
+    };
+
+    const onImageError = (e) => {
+      e.target.src = "/placeholder-recipe.jpg";
+      e.target.alt = "תמונת ברירת מחדל";
+    };
+
     const loadFamilyRecipes = async () => {
       try {
         const res = await axios.get("http://localhost:3000/user/family", {
           withCredentials: true,
         });
-        familyRecipes.value = res.data.map((r) => ({
+        familyRecipes.value = res.data.map((r, i) => ({
           ...r,
-          id: r.recipeID,
+          id: r.recipeID ?? r.id ?? i,
+          images: normalizeImages(r.image), // <<< תיקון מרכזי
         }));
-        console.log(`img: ${res.data[0].image}`);
+        // דיבאג נוח: נראה את המערך לאחר פענוח
+        console.log("images:", familyRecipes.value.map(r => r.images));
       } catch (err) {
         console.error("שגיאה בטעינת מתכונים משפחתיים:", err);
       }
@@ -71,17 +110,17 @@ export default {
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed : [raw];
       } catch (e) {
-        return raw.split(",").map((s) => s.trim());
+        return String(raw).split(",").map((s) => s.trim()).filter(Boolean);
       }
     };
 
     const parseInstructions = (text) => {
-    if (!text) return [];
-    return text
-      .split(/\n|\r|\d+\.\s?/) 
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-  };
+      if (!text) return [];
+      return String(text)
+        .split(/\n|\r|\d+\.\s?/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+    };
 
     onMounted(() => {
       loadFamilyRecipes();
@@ -90,7 +129,9 @@ export default {
     return {
       familyRecipes,
       parseIngredients,
-      parseInstructions
+      parseInstructions,
+      resolveImage,
+      onImageError,
     };
   },
 };
@@ -132,7 +173,6 @@ export default {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: transform 0.3s ease-in-out;
 }
-
 
 .recipe-image:hover {
   transform: scale(1.05);
@@ -193,7 +233,4 @@ export default {
   color: #607D8B;
   font-style: normal;
 }
-
-
-
 </style>
