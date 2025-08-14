@@ -196,7 +196,6 @@ export default {
   opacity: 0;
 }
 
-/* Floating Labels */
 .form-floating-vue {
   position: relative;
   margin-bottom: 1.5rem;

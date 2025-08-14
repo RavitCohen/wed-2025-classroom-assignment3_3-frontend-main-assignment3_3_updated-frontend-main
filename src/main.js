@@ -101,4 +101,3 @@ app.config.globalProperties.$store = store;
 // Mount app
 app.mount('#app');
 
-

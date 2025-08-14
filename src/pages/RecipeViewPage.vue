@@ -35,7 +35,6 @@
         <!-- הוראות -->
         <div class="col-md-6 instructions-box">
           <h4 class="section-title">📖 הוראות הכנה</h4>
-          <!-- <div v-html="formattedInstructions"></div> -->
            <div
             v-html="formattedInstructions.html"
             :dir="formattedInstructions.dir"

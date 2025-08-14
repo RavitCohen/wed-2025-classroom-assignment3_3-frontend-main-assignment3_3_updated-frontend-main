@@ -37,7 +37,6 @@ export default {
 
     const handleFavoriteUpdate = (recipeId, isNowFavorite) => {
       if (!isNowFavorite) {
-        // הסר מהרשימה אם הוסר מהמועדפים
         favorites.value = favorites.value.filter(r => r.id !== recipeId);
       }
     };

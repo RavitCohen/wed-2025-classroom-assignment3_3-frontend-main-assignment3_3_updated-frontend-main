@@ -28,17 +28,7 @@ export default {
   setup() {
     const myRecipes = ref([]);
 
-    // const loadMyRecipes = async () => {
-    //   try {
-    //     const res = await axios.get("http://localhost:3000/user/recipes", {
-    //       withCredentials: true,
-    //     });
-    //     // מסננים רק מתכונים עם ID שמתחיל ב-U_
-    //     myRecipes.value = res.data.filter(r => r.recipeID && r.recipeID.startsWith("U_"));
-    //   } catch (err) {
-    //     console.error("שגיאה בטעינת מתכונים שלי:", err);
-    //   }
-    // };
+
    const loadMyRecipes = async () => {
       try {
         const res = await axios.get("http://localhost:3000/user/recipes", {

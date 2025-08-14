@@ -5,15 +5,18 @@
     <div v-if="familyRecipes.length">
       <div v-for="recipe in familyRecipes" :key="recipe.id" class="recipe-card mb-5">
         <div class="recipe-content">
-          <div class="image-carousel">
-            <img
-              v-for="(imgSrc, index) in recipe.images"
-              :key="index"
-              :src="resolveImage(imgSrc)"
-              class="recipe-image"
-              :alt="`תמונה ${index + 1} למתכון ${recipe.title}`"
-              @error="onImageError($event)"
-            />
+          <div class="image-column">
+            <div class="image-carousel">
+              <img
+                v-for="(imgSrc, index) in recipe.images"
+                :key="index"
+                :src="resolveImage(imgSrc)"
+                class="recipe-image"
+                :alt="`תמונה ${index + 1} למתכון ${recipe.title}`"
+                @error="onImageError($event)"
+                loading="lazy"
+              />
+            </div>
           </div>
 
           <div class="recipe-details">
@@ -55,7 +58,6 @@ export default {
 
     const normalizeImages = (imageField) => {
       if (!imageField) return [];
-      // אם מה־DB מגיעה מחרוזת JSON כמו ["familyIMG/a.jpg", ...]
       if (typeof imageField === "string") {
         const s = imageField.trim();
         if (s.startsWith("[") || s.startsWith("{")) {
@@ -64,7 +66,6 @@ export default {
             if (Array.isArray(parsed)) return parsed.filter(Boolean);
             if (parsed?.url || parsed?.src) return [parsed.url || parsed.src];
           } catch {
-            // אם לא JSON תקין – נתייחס כמסלול יחיד
             return [s];
           }
         }
@@ -79,8 +80,8 @@ export default {
     const resolveImage = (src) => {
       if (!src) return "/placeholder-recipe.jpg";
       const isAbsolute = /^https?:\/\//i.test(src);
-      const clean = String(src).replace(/^\/+/, ""); // הסרת לוכסנים מיותרים בתחילת הנתיב
-      return isAbsolute ? src : `/${clean}`; // קבצים תחת public זמינים משורש האתר
+      const clean = String(src).replace(/^\/+/, "");
+      return isAbsolute ? src : `/${clean}`;
     };
 
     const onImageError = (e) => {
@@ -96,9 +97,8 @@ export default {
         familyRecipes.value = res.data.map((r, i) => ({
           ...r,
           id: r.recipeID ?? r.id ?? i,
-          images: normalizeImages(r.image), // <<< תיקון מרכזי
+          images: normalizeImages(r.image),
         }));
-        // דיבאג נוח: נראה את המערך לאחר פענוח
         console.log("images:", familyRecipes.value.map(r => r.images));
       } catch (err) {
         console.error("שגיאה בטעינת מתכונים משפחתיים:", err);
@@ -138,99 +138,116 @@ export default {
 </script>
 
 <style scoped>
-.recipe-card {
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  max-width: 2500px; 
-  margin: auto;
-  transition: 0.3s ease;
+
+.container { max-width: 1100px; }
+
+.recipe-card{
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(2, 29, 59, 0.06);
+  padding: clamp(1rem, 2vw, 2rem);
+  transition: transform .2s ease, box-shadow .2s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.recipe-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(2, 29, 59, 0.08);
 }
 
-.recipe-content {
+
+.recipe-content{
+  display: grid;
+  grid-template-columns: 220px 1fr;  
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 992px){
+  .recipe-content{ grid-template-columns: 180px 1fr; }
+}
+@media (max-width: 576px){
+  .recipe-content{ grid-template-columns: 1fr; } 
+}
+
+
+.image-column{ width: 100%; }
+.image-carousel{
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-direction: column;   
+  gap: 12px;
 }
 
-.image-carousel {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto ;
-  gap: 1rem;
-  white-space: nowrap;  
-  padding-bottom: 1rem;
-  scroll-behavior: smooth;
+
+.recipe-image{
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform .25s ease, box-shadow .25s ease;
+  background: #f0f3f7;
+}
+.recipe-image:hover{
+  transform: scale(1.02);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+  cursor: zoom-in;
 }
 
-.recipe-image {
-  flex: 0 0 auto;
-  width: 400px;          
-  height: 300px;        
-  object-fit: cover;     
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease-in-out;
-}
 
-.recipe-image:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-}
-
-.recipe-details {
-  font-size: 1.5rem;
-  line-height: 1.6;
-  text-align: right;
-}
-
-.recipe-details .author {
-  font-style: italic;
-  font-weight: 500;
-  color: #9a1b4c;
-  margin-top: 1rem;
-  font-size: 1.5rem;
-}
-
-.recipe-details .season {
-  font-style: italic;
-  font-weight: bold;
-  color: #F57C00;
-  font-size: 1.5rem;
-}
-.recipe-details ul,
-.recipe-details ol {
-  padding-inline-start: 1.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  line-height: 1.7;
-  color: #333;
-}
-
-.recipe-details li {
-  margin-bottom: 0.4rem;
-}
-.recipe-details h5 {
-  font-size: 1.8rem;
-  font-weight: bold;
+.recipe-details{ text-align: right; min-width: 0; }
+.recipe-details .card-title{
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: .2px;
   color: #263238;
-  margin-bottom: 1rem;
+  margin-bottom: .75rem;
+}
+.recipe-details p,
+.recipe-details li{ color: #3c4858; }
+.recipe-details strong{ color: #2c3e50; font-weight: 800; }
+
+/* תגים */
+.recipe-details .author{
+  display: inline-block;
+  background: #ffe6ef;
+  color: #9a1b4c;
+  border: 1px solid #ffd0e1;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  margin-top: .5rem;
+  font-size: 1rem;
+}
+.recipe-details .season{
+  display: inline-block;
+  background: #fff1e0;
+  color: #f57c00;
+  border: 1px solid #ffd7b0;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  margin-top: .5rem;
+  font-size: 1rem;
 }
 
-.recipe-details p {
-  font-size: 1.1rem;
+
+.recipe-details ul,
+.recipe-details ol{
+  padding-inline-start: 1.2rem;
+  margin: .25rem 0 1rem;
   line-height: 1.8;
-  margin-bottom: 0.8rem;
-  color: #424242;
 }
-.recipe-details strong {
-  color: #37474F; 
-  font-weight: 700;
-}
+.recipe-details li + li{ margin-top: .25rem; }
 
-.recipe-details em {
-  color: #607D8B;
-  font-style: normal;
+
+h2{ font-weight: 800; color: #0f172a; }
+
+
+.recipe-image[src*="placeholder-recipe.jpg"]{
+  object-fit: contain;
+  background: repeating-linear-gradient(
+    45deg,
+    #f3f4f6,
+    #f3f4f6 10px,
+    #eef2f7 10px,
+    #eef2f7 20px
+  );
 }
 </style>
