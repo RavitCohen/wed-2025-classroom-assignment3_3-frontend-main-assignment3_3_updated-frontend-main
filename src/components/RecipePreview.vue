@@ -8,11 +8,17 @@
         alt="תמונת מתכון"
       />
 
-      <div class="recipe-details flex-grow-1 pe-3" dir="rtl">
+      <div class="recipe-details flex-grow-1 pe-3">
         <h5 class="card-title mb-2">{{ recipe.title }}</h5>
         <p class="card-text">⏱ זמן הכנה: {{ recipe.readyInMinutes }} דקות</p>
 
-        <RecipeTagList :recipe="recipe" />
+        <div class="badges d-flex flex-wrap mb-2">
+          <b-badge v-if="recipe.vegetarian" variant="success" class="badge-item">🥕 צמחוני</b-badge>
+          <b-badge v-if="recipe.vegan" variant="success" class="badge-item">🌱 טבעוני</b-badge>
+          <b-badge v-if="recipe.glutenFree" variant="warning" class="badge-item">🚫 גלוטן</b-badge>
+          <b-badge v-if="recipe.isWatched" variant="info" class="badge-item">👁️ נצפה</b-badge>
+          <b-badge v-if="isFavorite" variant="danger" class="badge-item">❤️ מועדף</b-badge>
+        </div>
 
         <div v-if="isLoggedIn">
           <b-button
@@ -37,8 +43,8 @@
             variant="outline-secondary"
             size="sm"
             @click.stop="removeFromMyRecipe"
-          >
-            🗑️ הסר מתכון
+          >          
+          🗑️ הסר מתכון
           </b-button>
         </div>
       </div>
@@ -48,21 +54,20 @@
 
 <script>
 import store from "@/store";
-import { computed, ref } from "vue";
-import RecipeTagList from "@/components/tags/RecipeTagList.vue";
+import { computed, ref } from 'vue';
 
 export default {
   name: "RecipePreview",
-  components: { RecipeTagList },
   props: {
     recipe: { type: Object, required: true },
     isShowDelete: { type: Boolean, default: false }
   },
   setup(props) {
     const isLoggedIn = computed(() => !!store.username.value);
+    // ניהול מצב פנימי של מועדף
     const isFavorite = ref(props.recipe.isFavoriteByUser || false);
-    const showDeleteBtn = computed(() => props.isShowDelete);
-    return { isLoggedIn, isFavorite, showDeleteBtn };
+     const showDeleteBtn = computed(() => props.isShowDelete);
+    return { isLoggedIn, isFavorite,  showDeleteBtn};
   },
   methods: {
     async handleClick() {
@@ -103,16 +108,18 @@ export default {
         console.error("שגיאה בהסרת מועדף:", err);
       }
     },
-    async removeFromMyRecipe() {
-      try {
-        await this.axios.delete(
-          `${this.$root.store.server_domain}/user/recipes/${String(this.recipe.id).replace("U_", "")}`,
-          { withCredentials: true }
+    async removeFromMyRecipe(){
+        if (confirm("האם למחוק את המתכון הזה?")) {
+        try {
+          await this.axios.delete(`${this.$root.store.server_domain}/user/recipes/${this.recipe.id.replace("U_", "")}`, 
+          {withCredentials: true,}
         );
-        this.$emit("delete-recipe", this.recipe.id);
-        this.$emit("refresh");
-      } catch (err) {
-        console.error("שגיאה במחיקת מתכון:", err);
+
+          this.$emit("delete-recipe", this.recipe.id);
+          this.$emit("refresh");
+        } catch (err) {
+          console.error("שגיאה במחיקת מתכון:", err);
+        }
       }
     }
   }
@@ -127,7 +134,7 @@ export default {
   transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
   background: #fff;
-  min-height: 150px;
+  min-height: 150px; 
 }
 
 .recipe-card-horizontal:hover {
@@ -138,7 +145,7 @@ export default {
 .recipe-details {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; 
 }
 
 .recipe-image-horizontal {
@@ -149,9 +156,9 @@ export default {
 }
 
 .card-title {
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: #222;
+  font-weight: 700;       
+  font-size: 1.15rem;    
+  color: #222;           
 }
 
 .card-text {
@@ -169,7 +176,7 @@ export default {
 }
 
 .badge-item {
-  font-size: 0.85rem;
+  font-size: 0.85rem;   
 }
 
 @media (max-width: 576px) {
