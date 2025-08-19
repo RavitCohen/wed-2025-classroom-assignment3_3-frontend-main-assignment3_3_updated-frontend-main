@@ -1,20 +1,14 @@
 <template>
   <div class="container">
-    <div v-if="recipe" class="recipe-card animate-fade-in">
+    <div v-if="recipe" class="recipe-card animate-fade-in" dir="rtl">
       <!-- כותרת -->
       <h1 class="recipe-title">{{ recipe.title }}</h1>
 
       <!-- תמונה -->
-      <img :src="recipe.image" class="recipe-image shadow" />
+      <img :src="recipe.image" class="recipe-image shadow" alt="תמונת מתכון" />
 
       <!-- תגיות -->
-      <div class="tags text-center mt-2 mb-3">
-        <b-badge v-if="recipe.vegan" variant="success" class="mx-1">🌱 טבעוני</b-badge>
-        <b-badge v-if="recipe.vegetarian" variant="primary" class="mx-1">🥕 צמחוני</b-badge>
-        <b-badge v-if="recipe.glutenFree" variant="warning" class="mx-1">🚫 ללא גלוטן</b-badge>
-        <b-badge v-if="recipe.isFavoriteByUser" variant="danger" class="mx-1">❤️ במועדפים</b-badge>
-        <b-badge v-if="recipe.isWatched" variant="info" class="mx-1">👁️ נצפה לאחרונה</b-badge>
-      </div>
+      <RecipeTagList :recipe="recipe" />
 
       <div class="row recipe-body">
         <!-- מצרכים -->
@@ -23,7 +17,7 @@
           <p class="info-text">
             ל{{ recipe.servings }} מנות | זמן הכנה: {{ recipe.readyInMinutes }} דקות
           </p>
-          <ul             
+          <ul
             :dir="ingredientsDirection.dir"
             :style="{ textAlign: ingredientsDirection.textAlign }">
             <li v-for="(r, index) in recipe.extendedIngredients" :key="index">
@@ -35,7 +29,7 @@
         <!-- הוראות -->
         <div class="col-md-6 instructions-box">
           <h4 class="section-title">📖 הוראות הכנה</h4>
-           <div
+          <div
             v-html="formattedInstructions.html"
             :dir="formattedInstructions.dir"
             :style="{ textAlign: formattedInstructions.textAlign }"
@@ -51,97 +45,84 @@
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      recipe: null,
-    };
-  },
+import RecipeTagList from "@/components/tags/RecipeTagList.vue";
 
+export default {
+  name: "RecipeViewPage",
+  components: { RecipeTagList },
+  data() {
+    return { recipe: null };
+  },
   computed: {
     formattedInstructions() {
       if (!this.recipe || !this.recipe.instructions) {
-        return { html: '', dir: 'rtl', textAlign: 'right' };
+        return { html: "", dir: "rtl", textAlign: "right" };
       }
-
       const raw = this.recipe.instructions.trim();
-      console.log(raw);
       const isHebrew = /[\u0590-\u05FF]/.test(raw);
-      const dir = isHebrew ? 'rtl' : 'ltr';
-      const textAlign = isHebrew ? 'right' : 'left';
+      const dir = isHebrew ? "rtl" : "ltr";
+      const textAlign = isHebrew ? "right" : "left";
 
-      // HTML
       if (/<\/?(ol|ul|li)>/i.test(raw)) {
         const hasNumberedList = /<li>\s*\d+[.)]?\s*/i.test(raw) || /<ol>/i.test(raw);
-
-        // ordered
         if (hasNumberedList) {
           return { html: raw, dir, textAlign };
         }
-
-        // not ordered
-        const cleanText = raw.replace(/<\/?[^>]+>/g, '');
+        const cleanText = raw.replace(/<\/?[^>]+>/g, "");
         const steps = this.smartSplit(cleanText);
-        const html = `<ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+        const html = `<ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>`;
         return { html, dir, textAlign };
       }
 
-      // regular text
-      const lines = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-      const isNumbered = lines.every(line => /^\d+[.)]\s*/.test(line));
-
+      const lines = raw.split("\n").map((s) => s.trim()).filter((s) => s.length > 0);
+      const isNumbered = lines.every((line) => /^\d+[.)]\s*/.test(line));
       if (isNumbered) {
-        const steps = lines.map(s => s.replace(/^\d+[.)]\s*/, ''));
-        const listItems = steps.map(s => `<li>${s}</li>`).join('');
-        const html = `<ol>${listItems}</ol>`;
+        const steps = lines.map((s) => s.replace(/^\d+[.)]\s*/, ""));
+        const html = `<ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>`;
         return { html, dir, textAlign };
       } else {
-        const sentences = raw.replace(/<\/?[^>]+>/g, '');
+        const sentences = raw.replace(/<\/?[^>]+>/g, "");
         const steps = this.smartSplit(sentences);
-        const html = `<ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+        const html = `<ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>`;
         return { html, dir, textAlign };
       }
     },
-
     ingredientsDirection() {
-      const ingredientsText = this.recipe.extendedIngredients
-        .map(ing => typeof ing.original === 'string' ? ing.original : '')
-        .join(' ');
-
+      const ingredientsText = (this.recipe?.extendedIngredients || [])
+        .map((ing) => (typeof ing.original === "string" ? ing.original : ""))
+        .join(" ");
       const isHebrew = /[\u0590-\u05FF]/.test(ingredientsText);
       return {
-        dir: isHebrew ? 'rtl' : 'ltr',
-        textAlign: isHebrew ? 'right' : 'left'
+        dir: isHebrew ? "rtl" : "ltr",
+        textAlign: isHebrew ? "right" : "left",
       };
-  }
-},
-
+    },
+  },
   methods: {
-      smartSplit(text) {
-      if (text.includes('.')) {
+    smartSplit(text) {
+      if (text.includes(".")) {
         return text
           .split(/(?<=[.?!])\s+/)
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
       } else {
         return text
           .split(/\n+/)
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
       }
-    }}, 
+    },
+  },
   async created() {
     try {
-      let response = await this.axios.get(
+      const response = await this.axios.get(
         this.$root.store.server_domain + "/recipes/" + this.$route.params.recipeId
       );
-
       if (response.status !== 200) {
         this.$router.replace("/NotFound");
         return;
       }
-
-      let {
+      const {
         title,
         readyInMinutes,
         image,
@@ -154,7 +135,6 @@ export default {
         isFavoriteByUser,
         isWatched,
       } = response.data;
-      
 
       this.recipe = {
         title,
@@ -164,7 +144,7 @@ export default {
         vegetarian,
         glutenFree,
         extendedIngredients: Array.isArray(extendedIngredients)
-          ? extendedIngredients.map(s =>
+          ? extendedIngredients.map((s) =>
               typeof s === "string"
                 ? { original: s.replace(/^"+|"+$/g, "").trim() }
                 : s
@@ -204,12 +184,8 @@ export default {
 .recipe-image {
   display: block;
   margin: 0 auto 1rem auto;
-  max-width: 70%; 
+  max-width: 70%;
   border-radius: 0.5rem;
-}
-
-.tags {
-  font-size: 1rem;
 }
 
 .section-title {
@@ -226,16 +202,8 @@ export default {
   margin-bottom: 0.75rem;
 }
 
-.ingredients-box li {
-  line-height: 1.8;
-  margin-bottom: 0.6em;
-}
-
-.instructions-box p {
-  line-height: 1.8;
-  margin-bottom: 0.8em;
-}
-
+.ingredients-box li { line-height: 1.8; margin-bottom: 0.6em; }
+.instructions-box p { line-height: 1.8; margin-bottom: 0.8em; }
 
 .ingredients-box,
 .instructions-box {
@@ -245,12 +213,9 @@ export default {
   margin-bottom: 1rem;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.6s ease;
-}
-
+.animate-fade-in { animation: fadeIn 0.6s ease; }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 </style>
